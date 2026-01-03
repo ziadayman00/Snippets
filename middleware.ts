@@ -59,6 +59,10 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/api") &&
+    !request.nextUrl.pathname.startsWith("/about") &&
+    !request.nextUrl.pathname.startsWith("/docs") &&
+    !request.nextUrl.pathname.startsWith("/privacy") &&
+    !request.nextUrl.pathname.startsWith("/terms") &&
     request.nextUrl.pathname !== "/"
   ) {
     return NextResponse.redirect(new URL("/login", request.url));

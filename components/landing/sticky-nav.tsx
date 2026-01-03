@@ -2,7 +2,7 @@
 
 import { Code2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface StickyNavProps {
   isAuthenticated: boolean;
@@ -10,14 +10,27 @@ interface StickyNavProps {
 
 export function StickyNav({ isAuthenticated }: StickyNavProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100);
+      if (window.scrollY <= 100) setIsMobileMenuOpen(false); // Close when filtering back to top
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+        if (navRef.current && !navRef.current.contains(event.target as Node)) {
+            setIsMobileMenuOpen(false);
+        }
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+        window.removeEventListener("scroll", handleScroll);
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   return (
@@ -29,24 +42,27 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
       }`}
     >
       <div
-        className={`container mx-auto px-6 transition-all duration-300 ${
+        ref={navRef}
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className={`container mx-auto px-6 transition-all duration-300 ease-in-out relative overflow-hidden ${
           isScrolled
-            ? "max-w-5xl rounded-full border border-[var(--border-primary)] bg-[var(--bg-primary)]/95 backdrop-blur-sm shadow-lg px-6 py-3"
+            ? "w-[calc(100%-1rem)] md:w-full max-w-5xl rounded-[24px] border border-[var(--border-primary)] bg-[var(--bg-primary)]/95 backdrop-blur-sm shadow-lg px-6 py-3 cursor-pointer md:cursor-default"
             : "border border-transparent"
-        }`}
+        } ${isMobileMenuOpen && isScrolled ? "!py-6 bg-[var(--bg-primary)]" : ""}`} 
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between relative z-10">
           {/* Logo */}
           <Link
             href="/"
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
           >
             <Code2 className="h-6 w-6" />
             <span>Snippets</span>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* Navigation Links - Desktop */}
+          <div className="hidden md:flex items-center gap-8" onClick={(e) => e.stopPropagation()}>
             <Link
               href="/about"
               className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
@@ -70,29 +86,64 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
           </div>
 
           {/* CTA */}
-          {isAuthenticated ? (
-            <Link
-              href="/dashboard"
-              className={`text-sm font-medium transition-all ${
-                isScrolled
-                  ? "rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] px-4 py-2 hover:opacity-90"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className={`text-sm font-medium transition-all ${
-                isScrolled
-                  ? "rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] px-4 py-2 hover:opacity-90"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              Sign In
-            </Link>
-          )}
+          <div onClick={(e) => e.stopPropagation()}>
+            {isAuthenticated ? (
+                <Link
+                href="/dashboard"
+                className={`text-sm font-medium transition-all ${
+                    isScrolled && !isMobileMenuOpen
+                    ? "rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] px-4 py-2 hover:opacity-90"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+                >
+                Dashboard
+                </Link>
+            ) : (
+                <Link
+                href="/login"
+                className={`text-sm font-medium transition-all ${
+                    isScrolled && !isMobileMenuOpen
+                    ? "rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] px-4 py-2 hover:opacity-90"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+                >
+                Sign In
+                </Link>
+            )}
+           </div>
+        </div>
+
+        {/* Mobile Navigation Menu - Animated Height */}
+        <div 
+            className={`md:hidden grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isMobileMenuOpen ? "grid-rows-[1fr] opacity-100 pt-6" : "grid-rows-[0fr] opacity-0 pt-0"
+            }`}
+        >
+             <div className="overflow-hidden flex flex-col gap-2">
+                <Link
+                    href="/about"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
+                    >
+                    About
+                </Link>
+                <Link
+                    href="/docs"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
+                    >
+                    Docs
+                </Link>
+                <a
+                    href="https://github.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
+                >
+                    GitHub
+                </a>
+             </div>
         </div>
       </div>
     </nav>
