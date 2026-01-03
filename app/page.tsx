@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ArrowRight, Code2, Database, Zap } from "lucide-react";
 import Link from "next/link";
 import { StickyNav } from "@/components/landing/sticky-nav";
+import { TypingAnimation } from "@/components/ui/typing-animation";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -195,7 +196,7 @@ export default async function Home() {
               <div className="bg-[var(--bg-tertiary)] p-6 font-mono text-sm">
                 <div className="space-y-1 text-[var(--text-muted)]">
                   <div><span className="text-[var(--text-secondary)]">1</span>  <span className="text-purple-400">function</span> <span className="text-blue-400">organizeCode</span>() {"{"}</div>
-                  <div><span className="text-[var(--text-secondary)]">2</span>    <span className="text-purple-400">const</span> snippets = <span className="text-green-400">"all in one place"</span>;</div>
+                  <div><span className="text-[var(--text-secondary)]">2</span>    <span className="text-purple-400">const</span> snippets = <TypingAnimation text={'"all in one place"'} className="text-green-400" />;</div>
                   <div><span className="text-[var(--text-secondary)]">3</span>    <span className="text-purple-400">return</span> snippets;</div>
                   <div><span className="text-[var(--text-secondary)]">4</span>  {"}"}</div>
                   <div className="pt-2 text-xs opacity-50">// Line numbers, syntax highlighting, auto-indentation ✓</div>

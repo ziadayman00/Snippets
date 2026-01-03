@@ -9,6 +9,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+
 export default async function EditEntryPage({
   params,
 }: {
@@ -86,13 +87,15 @@ export default async function EditEntryPage({
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="flex items-center justify-center gap-2 rounded-md bg-[var(--text-primary)] px-4 py-2 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90 w-full sm:w-auto"
-            >
-              <Save className="h-4 w-4" />
-              <span>Save Changes</span>
-            </button>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                type="submit"
+                className="flex items-center justify-center gap-2 rounded-md bg-[var(--text-primary)] px-4 py-2 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90 w-full sm:w-auto"
+              >
+                <Save className="h-4 w-4" />
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-1 flex-col gap-4 sm:gap-6 overflow-hidden">

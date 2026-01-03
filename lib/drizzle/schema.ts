@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, jsonb, integer } from "drizzle-orm/pg-core";
 
 // Technologies - Categories for snippets
 export const technologies = pgTable("technologies", {
@@ -25,3 +25,12 @@ export const entries = pgTable("entries", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+
+// AI Usage - For rate limiting and analytics
+export const aiRequests = pgTable("ai_requests", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
+  userId: uuid("user_id").notNull(),
+  featureType: text("feature_type").notNull(), // 'explain' | 'refine'
+  tokensUsed: integer("tokens_used").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

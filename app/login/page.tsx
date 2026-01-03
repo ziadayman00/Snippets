@@ -33,10 +33,14 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setMessage({ text: error.message, type: "error" });
+      console.error("Magic link error:", error);
+      setMessage({ 
+        text: `Error: ${error.message}. Please try again or contact support.`, 
+        type: "error" 
+      });
     } else {
       setMessage({
-        text: "Check your email for the magic link.",
+        text: "Check your email for the magic link. It may take a few minutes to arrive.",
         type: "success",
       });
     }
