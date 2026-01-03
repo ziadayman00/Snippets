@@ -1,26 +1,303 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================
+   SNIPPETS — Minimal, Functional Design System
+   ============================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Base Colors */
+:root {
+  /* Background */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #242424;
+  --bg-tertiary: #2a2a2a;
+  
+  /* Text */
+  --text-primary: #e8e6e0;
+  --text-secondary: #a8a8a8;
+  --text-muted: #6a6a6a;
+  
+  /* Borders & Dividers */
+  --border-primary: #333333;
+  --border-secondary: #2a2a2a;
+  
+  /* Accent */
+  --accent-primary: #4a4a4a;
+  --accent-hover: #5a5a5a;
+  
+  /* Code Blocks */
+  --code-bg: #1e1e1e;
+  --code-border: #2a2a2a;
+  
+  /* States */
+  --focus-ring: #4a4a4a;
+  --destructive: #d87070;
+  --destructive-hover: #e08080;
+}
+
+/* Base Styles */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography defaults that play nice with Tailwind */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Focus States */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+/* Scrollbar (Webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+
+/* ============================================
+   VS CODE LIKE SYNTAX HIGHLIGHTING (Atom One Dark Base)
+   ============================================ */
+pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  padding: 0;
+  display: block;
+}
+
+/* Tokens */
+.hljs-comment,
+.hljs-quote {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-formula {
+  color: #c586c0;
+}
+
+.hljs-section,
+.hljs-name,
+.hljs-selector-tag,
+.hljs-deletion,
+.hljs-subst {
+  color: #e06c75;
+}
+
+.hljs-literal {
+  color: #569cd6;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+  color: #ce9178;
+}
+
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-number {
+  color: #9cdcfe;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-title {
+  color: #dcdcaa;
+}
+
+.hljs-built_in,
+.hljs-title.class_,
+.hljs-class .hljs-title {
+  color: #4ec9b0;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-link {
+  text-decoration: underline;
+}
+
+/* Editor Specific Overrides for TipTap */
+.ProseMirror {
+  outline: none;
+  min-height: 50vh; /* Default min-height, overridden by flex layout */
+  padding: 1.5rem; /* More breathing room */
+}
+
+/* Placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--text-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ============================================
+   CODEMIRROR EDITOR STYLING
+   ============================================ */
+.codemirror-wrapper {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.codemirror-wrapper .cm-editor {
+  background: #1e1e1e !important;
+  color: #d4d4d4;
+  outline: none !important;
+}
+
+.codemirror-wrapper .cm-scroller {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  padding: 0.75rem 0;
+}
+
+.codemirror-wrapper .cm-content {
+  padding: 0 0.5rem;
+}
+
+.codemirror-wrapper .cm-gutters {
+  background: #1e1e1e;
+  border-right: 1px solid #2a2a2a;
+  color: #858585;
+  padding-right: 0.5rem;
+}
+
+.codemirror-wrapper .cm-activeLineGutter {
+  background: #2a2a2a;
+}
+
+.codemirror-wrapper .cm-activeLine {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.codemirror-wrapper .cm-line {
+  padding: 0 0.5rem;
+}
+
+/* ============================================
+   LANDING PAGE ANIMATIONS
+   ============================================ */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animated-gradient {
+  background: linear-gradient(
+    -45deg,
+    var(--bg-primary),
+    var(--bg-secondary),
+    var(--bg-primary),
+    var(--bg-tertiary)
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
 }
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.fade-in-up-delay-1 {
+  opacity: 0;
+  animation: fade-in-up 0.6s ease-out 0.2s forwards;
+}
+
+.fade-in-up-delay-2 {
+  opacity: 0;
+  animation: fade-in-up 0.6s ease-out 0.4s forwards;
+}
+
+.fade-in-up-delay-3 {
+  opacity: 0;
+  animation: fade-in-up 0.6s ease-out 0.6s forwards;
+}
+
