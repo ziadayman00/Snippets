@@ -26,6 +26,7 @@
     "@supabase/supabase-js": "^2.89.0",
     "@tiptap/extension-bubble-menu": "^3.14.0",
     "@tiptap/extension-code-block-lowlight": "^3.14.0",
+    "@tiptap/extension-mention": "^3.14.0",
     "@tiptap/extension-text-align": "^3.14.0",
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
@@ -44,6 +45,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.4.0",
+    "tippy.js": "^6.3.7",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

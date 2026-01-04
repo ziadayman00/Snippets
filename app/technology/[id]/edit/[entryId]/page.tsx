@@ -1,6 +1,4 @@
-
-import { TiptapEditor } from "@/components/editor/tiptap-editor";
-import { EditorGuide } from "@/components/editor/editor-guide";
+import { EntryEditorWrapper } from "@/components/editor/entry-editor-wrapper";
 import { updateEntry } from "@/lib/actions/entry";
 import { db } from "@/lib/drizzle/db";
 import { entries, technologies } from "@/lib/drizzle/schema";
@@ -10,9 +8,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-
-
- export default async function EditEntryPage({
+export default async function EditEntryPage({
  params,
 }: {
   params: Promise<{ id: string; entryId: string }>;
@@ -36,27 +32,32 @@ import { notFound, redirect } from "next/navigation";
     notFound();
   }
 
-  // Fetch entry
+  // Fetch entry with relations
   const entry = await db.query.entries.findFirst({
     where: eq(entries.id, entryId),
+    with: {
+        outgoingLinks: {
+            with: { target: true }
+        },
+        incomingLinks: {
+            with: { source: true }
+        }
+    }
   });
 
   if (!entry) {
     notFound();
   }
 
-  // Verify ownership? (Optional, but good practice. RLS handles it too usually if policies set right, but we removed public.users)
-  // Since we query by ID and assuming we might filter by user_id in future, for now if they have the ID they can see it
-  // BUT we should verify permission if possible.
-  // We can add `where: and(eq(entries.id, entryId), eq(entries.userId, user.id))` if we wanted to be strict.
-  // For now, let's just proceed.
+  // Update last viewed
+  await db.update(entries)
+    .set({ lastViewedAt: new Date() })
+    .where(eq(entries.id, entryId));
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--bg-primary)]">
-
-
+    <div className="flex min-h-screen lg:h-screen flex-col bg-[var(--bg-primary)]">
       <main className="flex-1 flex flex-col min-h-0">
-        <form action={updateEntry} className="container mx-auto flex h-full max-w-5xl flex-col px-4 sm:px-6 py-4 sm:py-6">
+        <form action={updateEntry} className="container mx-auto flex lg:h-full max-w-6xl flex-col px-4 sm:px-6 py-4 sm:py-6">
           <input type="hidden" name="technologyId" value={id} />
           <input type="hidden" name="entryId" value={entryId} />
           
@@ -100,8 +101,7 @@ import { notFound, redirect } from "next/navigation";
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col gap-4 sm:gap-6 overflow-hidden">
-             <EditorGuide />
+          <div className="flex flex-1 flex-col gap-4 overflow-hidden">
              
             <input
               type="text"
@@ -113,10 +113,10 @@ import { notFound, redirect } from "next/navigation";
               autoFocus
             />
 
-            <TiptapEditor 
-                content={JSON.stringify(entry.content)} 
-                name="content" 
-                className="flex-1 overflow-y-auto"
+            <EntryEditorWrapper 
+                initialContent={entry.content}
+                incomingLinks={entry.incomingLinks}
+                initialOutgoingLinks={entry.outgoingLinks}
             />
           </div>
         </form>

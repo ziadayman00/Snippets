@@ -20,9 +20,10 @@ interface TechCardProps {
   id: string;
   name: string;
   count?: number;
+  icon?: string | null;
 }
 
-export function TechCard({ id, name, count = 0 }: TechCardProps) {
+export function TechCard({ id, name, count = 0, icon }: TechCardProps) {
   const [loading, setLoading] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [newName, setNewName] = useState(name);
@@ -64,12 +65,16 @@ export function TechCard({ id, name, count = 0 }: TechCardProps) {
             window.location.href = `/technology/${id}`;
           }
         }}>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
-              <Folder className="h-5 w-5" />
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--bg-tertiary)] text-[var(--text-secondary)] transition-colors group-hover:bg-[var(--bg-primary)] group-hover:text-[var(--accent-primary)]">
+               {icon ? (
+                  <span className="text-lg">{icon}</span>
+               ) : (
+                  <Folder className="h-6 w-6" />
+               )}
             </div>
             <div>
-              <h3 className="font-medium leading-none tracking-tight text-[var(--text-primary)]">
+              <h3 className="text-lg font-semibold leading-none tracking-tight text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-primary)]">
                 {name}
               </h3>
               <p className="mt-1 text-xs text-[var(--text-muted)]">

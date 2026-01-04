@@ -56,13 +56,12 @@ export default async function AboutPage() {
           <section className="mb-16">
             <h2 className="text-2xl font-bold mb-4">Our Philosophy</h2>
             <p className="text-[var(--text-muted)] leading-relaxed mb-4">
-              Most note-taking apps are built for everyone, which means they're optimized for no one. 
-              Snippets is different. It's built exclusively for developers who need to store code, 
-              configurations, and technical notes.
+              Code doesn't exist in a vacuum. It's connected. Most note-taking apps treat your snippets as isolated islands, 
+              but your knowledge is a network. Snippets is built to mirror how your brain works: connected, contextual, and always ready.
             </p>
             <p className="text-[var(--text-muted)] leading-relaxed">
-              We believe in simplicity, speed, and a distraction-free interface. No bloat, 
-              no unnecessary features—just a powerful editor and a clean organization system.
+              We believe in friction-free workflows. Whether you're jumping back into a complex problem after the weekend 
+              or connecting two related concepts, the interface should get out of your way and let you flow.
             </p>
           </section>
 
@@ -70,6 +69,8 @@ export default async function AboutPage() {
           <section className="mb-16">
             <h2 className="text-2xl font-bold mb-6">Key Features</h2>
             <div className="space-y-6">
+              
+              {/* Feature: Editor */}
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
                   <Code2 className="h-5 w-5" />
@@ -77,51 +78,54 @@ export default async function AboutPage() {
                 <div>
                   <h3 className="font-semibold mb-2">Professional Code Editor</h3>
                   <p className="text-[var(--text-muted)] leading-relaxed">
-                    Powered by CodeMirror 6, the same editor used by Replit and Chrome DevTools. 
-                    Features line numbers, syntax highlighting for 20+ languages, auto-indentation, 
-                    and bracket matching.
+                    Powered by CodeMirror 6. Features line numbers, syntax highlighting for 20+ languages, 
+                    auto-indentation, and bracket matching. It feels like your IDE.
                   </p>
                 </div>
               </div>
 
+              {/* Feature: Context/Linking */}
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
                   <Database className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Organized by Technology</h3>
+                  <h3 className="font-semibold mb-2">Contextual Knowledge Graph</h3>
                   <p className="text-[var(--text-muted)] leading-relaxed">
-                    Group your snippets by language or framework. Create separate collections for 
-                    React, Python, Docker, or any technology you work with.
+                    Don't just store code—connect it. Use <code className="bg-[var(--bg-tertiary)] px-1 rounded">@</code> mentions 
+                    to link snippets together. See what's connected and traverse your knowledge base like a graph.
                   </p>
                 </div>
               </div>
 
+              {/* Feature: Continuity */}
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
                   <Zap className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Lightning Fast</h3>
+                  <h3 className="font-semibold mb-2">Smart Continuity</h3>
                   <p className="text-[var(--text-muted)] leading-relaxed">
-                    Built on Next.js 16 and Supabase's edge network. Pages load instantly, 
-                    and your data syncs in real-time across all your devices.
+                    Pick up exactly where you left off. The dashboard remembers what you were working on 
+                    and offers a one-click resume. Capture ideas instantly with Quick Create.
                   </p>
                 </div>
               </div>
 
+              {/* Feature: Review */}
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
                   <Lock className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Secure & Private</h3>
+                  <h3 className="font-semibold mb-2">Active Recall</h3>
                   <p className="text-[var(--text-muted)] leading-relaxed">
-                    Your data is encrypted and protected by Supabase's Row Level Security. 
-                    Only you can access your snippets—no one else, not even us.
+                    Keep your knowledge fresh. The "Rediscover" mode surfaces snippets you haven't seen in a while, 
+                    helping you retain syntax and solutions you might otherwise forget.
                   </p>
                 </div>
               </div>
+
             </div>
           </section>
 

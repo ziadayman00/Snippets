@@ -83,30 +83,67 @@ export default async function DocsPage() {
             <h2 className="text-2xl font-bold mb-4">Using the Editor</h2>
             <div className="space-y-4 text-[var(--text-muted)]">
               <div>
-                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Rich Text Formatting</h3>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Rich Text & Code</h3>
                 <p>
-                  Use the toolbar to make text <strong>bold</strong>, <em>italic</em>, or add headings. 
-                  You can also create lists and blockquotes.
+                  The editor supports full markdown-style formatting. Use the toolbar or shortcuts to add headings, 
+                  lists, and bold text. Insert code blocks with <code className="rounded bg-[var(--bg-tertiary)] px-2 py-1 text-sm">{"{ }"}</code> to 
+                  get syntax highlighting.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Connected Knowledge */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">Connected Knowledge</h2>
+            <div className="space-y-4 text-[var(--text-muted)]">
+              <div>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Linking Snippets</h3>
+                <p>
+                  Type <code className="rounded bg-[var(--bg-tertiary)] px-2 py-1 text-sm">@</code> to open the connection menu. 
+                  Select any other snippet to create a bidirectional link.
                 </p>
               </div>
               <div>
-                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Code Blocks</h3>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Context Sidebar</h3>
                 <p>
-                  Click the <code className="rounded bg-[var(--bg-tertiary)] px-2 py-1 text-sm">{"{ }"}</code> button 
-                  to insert a code block. The editor includes:
+                  The sidebar shows you exactly how your knowledge connects. "Connected To" shows what you've linked to, 
+                  and "Referenced By" shows other snippets that link back to the current one.
                 </p>
-                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
-                  <li>Line numbers</li>
-                  <li>Syntax highlighting for 20+ languages</li>
-                  <li>Auto-indentation</li>
-                  <li>Bracket matching</li>
-                  <li>Language switching (click the language name)</li>
-                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* Smart Workflows */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">Smart Workflows</h2>
+            <div className="space-y-4 text-[var(--text-muted)]">
+              <div>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Resume Working</h3>
+                <p>
+                  If you leave the app and come back within 48 hours, the dashboard will offer a "Resume" banner 
+                  to take you straight back to your last edit.
+                </p>
               </div>
               <div>
-                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Saving</h3>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Quick Create</h3>
                 <p>
-                  Click "Save Entry" when you're done. Your work is automatically saved to the cloud.
+                  Need to capture a thought instantly? Use the "Quick Create" button on the dashboard to 
+                  start a new snippet without navigating through technology folders.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Review Mode */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">Keeping Knowledge Fresh</h2>
+            <div className="space-y-4 text-[var(--text-muted)]">
+              <div>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Review Mode</h3>
+                <p>
+                  Click the "Rediscover" card on your dashboard to enter Review Mode. We surface snippets you 
+                  haven't viewed in a while to help you refresh your memory. It's like spaced repetition for your code.
                 </p>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, uuid, jsonb, integer } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 // Technologies - Categories for snippets
 export const technologies = pgTable("technologies", {
@@ -23,7 +24,45 @@ export const entries = pgTable("entries", {
   userId: uuid("user_id").notNull(), // Managed by Supabase Auth
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  lastViewedAt: timestamp("last_viewed_at"),
 });
+
+export const snippetLinks = pgTable("snippet_links", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sourceId: uuid("source_id")
+    .notNull()
+    .references(() => entries.id, { onDelete: "cascade" }),
+  targetId: uuid("target_id")
+    .notNull()
+    .references(() => entries.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const entriesRelations = relations(entries, ({ one, many }) => ({
+  technology: one(technologies, {
+    fields: [entries.technologyId],
+    references: [technologies.id],
+  }),
+  outgoingLinks: many(snippetLinks, { relationName: "sourceSnippet" }),
+  incomingLinks: many(snippetLinks, { relationName: "targetSnippet" }),
+}));
+
+export const snippetLinksRelations = relations(snippetLinks, ({ one }) => ({
+  source: one(entries, {
+    fields: [snippetLinks.sourceId],
+    references: [entries.id],
+    relationName: "sourceSnippet",
+  }),
+  target: one(entries, {
+    fields: [snippetLinks.targetId],
+    references: [entries.id],
+    relationName: "targetSnippet",
+  }),
+}));
+
+export const technologiesRelations = relations(technologies, ({ many }) => ({
+  entries: many(entries),
+}));
 
 
 // AI Usage - For rate limiting and analytics

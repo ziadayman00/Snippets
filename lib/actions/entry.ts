@@ -7,6 +7,8 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { syncSnippetLinks } from "@/lib/actions/links";
+
 export async function createEntry(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -25,28 +27,56 @@ export async function createEntry(formData: FormData) {
     throw new Error("Title is required");
   }
   
-  if (!content) {
-      throw new Error("Content is required");
-  }
+  // Default content for Tiptap if not provided
+  const defaultContent = {
+      type: "doc",
+      content: [
+          {
+              type: "paragraph",
+              content: []
+          }
+      ]
+  };
 
   try {
      // Validate JSON content
-    try {
-        JSON.parse(content);
-    } catch {
-        throw new Error("Invalid content format");
+    let contentJson = defaultContent;
+    if (content) {
+        try {
+            contentJson = JSON.parse(content);
+        } catch {
+            throw new Error("Invalid content format");
+        }
     }
 
-    await db.insert(entries).values({
+    const [inserted] = await db.insert(entries).values({
       title,
-      content: JSON.parse(content), // Store as JSON object
+      content: contentJson, // Store as JSON object
       technologyId,
       userId: user.id,
-    });
+    }).returning({ id: entries.id });
+
+    if (inserted) {
+        await syncSnippetLinks(inserted.id, contentJson);
+    }
 
     revalidatePath(`/technology/${technologyId}`);
     revalidatePath("/dashboard");
+    
+    // If successfully inserted, we can redirect or return success. 
+    // Since QuickCreate uses this, we might want to redirect.
+    // However, if normal create uses this, checks if it expects a redirect.
+    // But normal create is usually on a separate page or modal.
+    // Let's redirect if inserted.
+    if (inserted) {
+        redirect(`/technology/${technologyId}/edit/${inserted.id}`);
+    }
+
   } catch (error) {
+    // Redirect throws an error (NEXT_REDIRECT), so we must catch it and re-throw if it is a redirect error.
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+        throw error;
+    }
     console.error("Failed to create entry:", error);
     throw new Error("Failed to create entry");
   }
@@ -104,8 +134,9 @@ export async function updateEntry(formData: FormData) {
 
   try {
      // Validate JSON content
+    let contentJson;
     try {
-        JSON.parse(content);
+        contentJson = JSON.parse(content);
     } catch {
         throw new Error("Invalid content format");
     }
@@ -113,10 +144,12 @@ export async function updateEntry(formData: FormData) {
     await db.update(entries)
         .set({
             title,
-            content: JSON.parse(content),
+            content: contentJson,
             updatedAt: new Date(),
         })
         .where(eq(entries.id, id));
+    
+    await syncSnippetLinks(id, contentJson);
 
     revalidatePath(`/technology/${technologyId}`);
   } catch (error) {
