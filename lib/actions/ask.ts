@@ -45,6 +45,7 @@ export async function askQuestion(question: string) {
         id: entries.id,
         title: entries.title,
         content: entries.content,
+        technologyId: entries.technologyId,
         technologyName: technologies.name,
         similarity: sql<number>`1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector)`,
       })
@@ -62,6 +63,7 @@ export async function askQuestion(question: string) {
       return {
         answer: "I couldn't find any relevant notes to answer this question. Try asking about topics you've saved in your snippets.",
         snippetCount: 0,
+        sources: [],
       };
     }
 
@@ -73,7 +75,7 @@ export async function askQuestion(question: string) {
       })
       .join('\n\n');
 
-    // Step 5: Create system and user prompts
+    // ... (System and User prompts remain the same) ...
     const systemPrompt = `You are a study assistant helping the user review their own notes.
 
 Rules:
@@ -102,9 +104,83 @@ Answer the question based strictly on these notes. If the notes don't contain en
     return {
       answer: result.text,
       snippetCount: filteredSnippets.length,
+      sources: filteredSnippets.map(s => ({
+        id: s.id,
+        title: s.title,
+        technologyId: s.technologyId,
+        technologyName: s.technologyName,
+        similarity: Math.round(s.similarity * 100),
+      })),
     };
   } catch (error) {
     console.error("Failed to answer question:", error);
     throw new Error("Failed to generate answer");
+  }
+}
+
+/**
+ * Generate suggested questions based on user's notes
+ */
+export async function getSuggestedQuestions(): Promise<string[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  try {
+    // 1. Get 3 random snippets with content
+    const randomSnippets = await db
+      .select({
+        title: entries.title,
+        content: entries.content,
+        technologyName: technologies.name,
+      })
+      .from(entries)
+      .innerJoin(technologies, eq(entries.technologyId, technologies.id))
+      .where(eq(entries.userId, user.id))
+      .orderBy(sql`RANDOM()`)
+      .limit(3);
+
+    if (randomSnippets.length === 0) {
+      return [
+        "What is the difference between let and var?",
+        "Explain the concept of closures",
+        "How does the event loop work?",
+      ];
+    }
+
+    // 2. Build context
+    const context = randomSnippets
+      .map((s) => {
+        const text = extractSearchableText(s.title, s.content).slice(0, 500); // Limit context
+        return `Topic: ${s.title} (${s.technologyName})\nContent: ${text}`;
+      })
+      .join("\n\n");
+
+    // 3. Generate questions using Gemini
+    const { text } = await generateText({
+      model: google("gemini-2.5-flash"),
+      system: "You are a helpful study tool. Generate 3 short, specific questions based on the provided notes. The questions should test understanding of the concepts. Return ONLY the questions, one per line, without numbering or bullets.",
+      prompt: `Notes:\n${context}\n\nGenerate 3 questions:`,
+      temperature: 0.7, // Higher creativity for suggestions
+    });
+
+    // 4. Parse results
+    return text
+      .split("\n")
+      .map((q) => q.replace(/^[0-9-.]+\s*/, "").trim()) // Remove numbering if model adds it
+      .filter((q) => q.length > 0)
+      .slice(0, 3);
+
+  } catch (error) {
+    console.error("Failed to generate suggestions:", error);
+    // Fallback defaults
+    return [
+      "Explain the key concepts in my notes",
+      "What topics should I review today?",
+      "Summarize my recent learnings",
+    ];
   }
 }

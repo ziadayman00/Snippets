@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Plus, Code2 } from "lucide-react";
+import { LogOut, Plus, Code2, BarChart3 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -32,7 +32,15 @@ export function Header({ email }: { email?: string }) {
             <SemanticSearchBar />
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/stats"
+              className="flex items-center justify-center rounded-md p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              title="Analytics"
+            >
+              <BarChart3 className="h-5 w-5" />
+            </Link>
+
             <button
               onClick={() => setShowCreateDialog(true)}
               className="flex items-center gap-2 rounded-md bg-[var(--text-primary)] px-3 py-1.5 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90"

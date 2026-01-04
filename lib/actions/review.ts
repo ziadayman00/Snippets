@@ -38,3 +38,34 @@ export async function getReviewSnippets() {
 
   return snippets;
 }
+
+/**
+ * Get count of snippets due for review
+ */
+export async function getReviewCount(): Promise<number> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return 0;
+  }
+
+  const now = new Date();
+
+  const dueSnippets = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(entries)
+    .where(
+      and(
+        eq(entries.userId, user.id),
+        or(
+          lt(entries.lastViewedAt, sql`NOW() - INTERVAL '24 hours'`),
+          isNull(entries.lastViewedAt)
+        )
+      )
+    );
+
+  return Number(dueSnippets[0]?.count || 0);
+}

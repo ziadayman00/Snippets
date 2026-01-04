@@ -2,6 +2,7 @@ import { Header } from "@/components/dashboard/header";
 import { TechCard } from "@/components/dashboard/tech-card";
 import { ResumeBanner } from "@/components/dashboard/resume-banner";
 import { QuickCreateDialog } from "@/components/dashboard/quick-create-dialog";
+import { ReviewCard } from "@/components/dashboard/review-card";
 import { db } from "@/lib/drizzle/db";
 import { entries, technologies } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
@@ -9,7 +10,7 @@ import { desc, eq, isNotNull, and } from "drizzle-orm";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
 import { Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { getReviewSnippets } from "@/lib/actions/review";
+import { getReviewSnippets, getReviewCount } from "@/lib/actions/review";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -75,6 +76,9 @@ export default async function DashboardPage() {
     entriesCount: counts[tech.id] || 0,
   }));
 
+  // Get review count
+  const reviewCount = await getReviewCount();
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
       <Header email={user.email} />
@@ -107,6 +111,9 @@ export default async function DashboardPage() {
         {showResumeBanner && (
             <ResumeBanner entry={mostRecent!} />
         )}
+
+        {/* Review Card */}
+        <ReviewCard count={reviewCount} />
 
         <div className="flex flex-col gap-10">
           
