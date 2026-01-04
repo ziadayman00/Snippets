@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { syncSnippetLinks } from "@/lib/actions/links";
+import { upsertEmbedding } from "@/lib/actions/embeddings";
 
 export async function createEntry(formData: FormData) {
   const supabase = await createClient();
@@ -58,6 +59,8 @@ export async function createEntry(formData: FormData) {
 
     if (inserted) {
         await syncSnippetLinks(inserted.id, contentJson);
+        // Generate AI embedding for semantic search
+        await upsertEmbedding(inserted.id, title, contentJson);
     }
 
     revalidatePath(`/technology/${technologyId}`);
@@ -150,6 +153,8 @@ export async function updateEntry(formData: FormData) {
         .where(eq(entries.id, id));
     
     await syncSnippetLinks(id, contentJson);
+    // Update AI embedding for semantic search
+    await upsertEmbedding(id, title, contentJson);
 
     revalidatePath(`/technology/${technologyId}`);
   } catch (error) {

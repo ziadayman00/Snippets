@@ -89,7 +89,19 @@ export default async function DashboardPage() {
                 Manage your knowledge base
             </p>
           </div>
-          <QuickCreateDialog technologies={technologiesData} />
+          <div className="flex items-center gap-3">
+            <Link
+              href="/ask"
+              className="flex items-center gap-2 rounded-md border border-[var(--border-primary)] bg-[var(--bg-secondary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:border-[var(--accent-primary)]"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>Ask</span>
+              <span className="ml-1 rounded bg-[var(--accent-primary)]/10 px-1.5 py-0.5 text-xs font-semibold text-[var(--accent-primary)]">
+                BETA
+              </span>
+            </Link>
+            <QuickCreateDialog technologies={technologiesData} />
+          </div>
         </div>
 
         {showResumeBanner && (

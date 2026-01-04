@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { CreateTechDialog } from "./create-tech-dialog";
+import { SemanticSearchBar } from "@/components/search/semantic-search-bar";
 import Link from "next/link";
 
 export function Header({ email }: { email?: string }) {
@@ -20,19 +21,24 @@ export function Header({ email }: { email?: string }) {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-[var(--border-primary)] bg-[var(--bg-primary)]/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
+        <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity shrink-0">
             <Code2 className="h-6 w-6" />
-            <span>Snippets</span>
+            <span className="hidden sm:inline">Snippets</span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          {/* Semantic Search Bar */}
+          <div className="flex-1 max-w-md hidden md:block">
+            <SemanticSearchBar />
+          </div>
+
+          <div className="flex items-center gap-4 shrink-0">
             <button
               onClick={() => setShowCreateDialog(true)}
               className="flex items-center gap-2 rounded-md bg-[var(--text-primary)] px-3 py-1.5 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90"
             >
               <Plus className="h-4 w-4" />
-              <span>New Technology</span>
+              <span className="hidden sm:inline">New Technology</span>
             </button>
 
             {email && (

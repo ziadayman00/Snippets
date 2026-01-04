@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, jsonb, integer, vector } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Technologies - Categories for snippets
@@ -38,6 +38,18 @@ export const snippetLinks = pgTable("snippet_links", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Embeddings - Vector representations for semantic search
+export const snippetEmbeddings = pgTable("snippet_embeddings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  entryId: uuid("entry_id")
+    .notNull()
+    .references(() => entries.id, { onDelete: "cascade" })
+    .unique(),
+  embedding: vector("embedding", { dimensions: 768 }), // Gemini text-embedding-004 dimensions
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const entriesRelations = relations(entries, ({ one, many }) => ({
   technology: one(technologies, {
     fields: [entries.technologyId],
@@ -45,6 +57,10 @@ export const entriesRelations = relations(entries, ({ one, many }) => ({
   }),
   outgoingLinks: many(snippetLinks, { relationName: "sourceSnippet" }),
   incomingLinks: many(snippetLinks, { relationName: "targetSnippet" }),
+  embedding: one(snippetEmbeddings, {
+    fields: [entries.id],
+    references: [snippetEmbeddings.entryId],
+  }),
 }));
 
 export const snippetLinksRelations = relations(snippetLinks, ({ one }) => ({
