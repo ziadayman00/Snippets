@@ -8,11 +8,15 @@ import { common, createLowlight } from "lowlight";
 import { 
   Bold, Italic, Code, List, ListOrdered, Quote, 
   Underline as UnderlineIcon, Highlighter, Type, 
-  Heading1, Heading2, Heading3, ChevronDown
+  Heading1, Heading2, Heading3, ChevronDown,
+  Maximize2, Minimize2,
+  Undo, Redo, Strikethrough, Minus, 
+  AlignLeft, AlignCenter, AlignRight
 } from "lucide-react";
 import { CodeMirrorBlock } from "./codemirror-block";
 import { Marker, Underline, FontSize } from "./extensions"; 
 import Heading from '@tiptap/extension-heading';
+import TextAlign from '@tiptap/extension-text-align';
 
 // Register languages for syntax highlighting
 const lowlight = createLowlight(common);
@@ -59,6 +63,9 @@ const extensions = [
   Marker,
   Underline,
   FontSize,
+  TextAlign.configure({
+    types: ['heading', 'paragraph'],
+  }),
 ];
 
 // Highlight colors palette
@@ -80,6 +87,13 @@ export function TiptapEditor({
 }: EditorProps) {
   const [jsonContent, setJsonContent] = useState(content);
   const [menuStyle, setMenuStyle] = useState<{ top: number; left: number } | null>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  // Toggle full screen
+  const toggleFullScreen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsFullScreen(!isFullScreen);
+  };
 
   const editor = useEditor({
     extensions, 
@@ -88,7 +102,8 @@ export function TiptapEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert max-w-none focus:outline-none min-h-full px-6 py-6 text-[var(--text-primary)]",
+          "prose prose-invert max-w-none focus:outline-none min-h-full px-6 py-6 text-[var(--text-primary)] mx-auto container",
+        dir: "auto",
       },
     },
     onUpdate: ({ editor }) => {
@@ -119,10 +134,49 @@ export function TiptapEditor({
   }
 
   return (
-    <div className={`flex flex-col rounded-xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden transition-all focus-within:ring-1 focus-within:ring-[var(--focus-ring)] ${className} relative`}>
+    <div 
+      className={`editor-wrapper flex flex-col border border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden transition-all focus-within:ring-1 focus-within:ring-[var(--focus-ring)] ${
+        isFullScreen 
+          ? "fixed inset-0 z-[100] h-screen w-screen rounded-none border-0" 
+          : `relative rounded-xl ${className}`
+      }`}
+    >
       {editable && (
         <>
-            <div className="flex flex-wrap gap-1 border-b border-[var(--border-primary)] bg-[var(--bg-tertiary)] p-2 items-center">
+            <div className={`editor-toolbar flex flex-wrap gap-1 border-b border-[var(--border-primary)] bg-[var(--bg-tertiary)] p-2 items-center ${isFullScreen ? 'px-4 py-3' : ''}`}>
+            
+            {/* Full Screen Toggle */}
+            <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 mr-1 gap-1">
+               <ToolbarButton
+                  onClick={toggleFullScreen}
+                  isActive={isFullScreen}
+                  icon={isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                  title={isFullScreen ? "Minimize" : "Full Screen"}
+               />
+            </div>
+            
+            <div className="mx-1 h-6 w-px bg-[var(--border-primary)]" />
+
+            {/* History (Full Screen Only) */}
+            {isFullScreen && (
+                <>
+                <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+                    <ToolbarButton
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().undo().run(); }}
+                        isActive={false}
+                        icon={<Undo className="h-4 w-4" />}
+                        title="Undo"
+                    />
+                    <ToolbarButton
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().redo().run(); }}
+                        isActive={false}
+                        icon={<Redo className="h-4 w-4" />}
+                        title="Redo"
+                    />
+                </div>
+                <div className="mx-1 h-6 w-px bg-[var(--border-primary)]" />
+                </>
+            )}
             
             {/* Headers */}
             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
@@ -145,9 +199,36 @@ export function TiptapEditor({
                     title="Heading 3"
                 />
             </div>
+            
+            {/* Alignment (Full Screen Only) */}
+            {isFullScreen && (
+                <>
+                 <div className="mx-1 h-6 w-px bg-[var(--border-primary)]" />
+                 <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+                    <ToolbarButton
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('left').run(); }}
+                        isActive={editor.isActive({ textAlign: 'left' })}
+                        icon={<AlignLeft className="h-4 w-4" />}
+                        title="Align Left"
+                    />
+                    <ToolbarButton
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('center').run(); }}
+                        isActive={editor.isActive({ textAlign: 'center' })}
+                        icon={<AlignCenter className="h-4 w-4" />}
+                        title="Align Center"
+                    />
+                    <ToolbarButton
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('right').run(); }}
+                        isActive={editor.isActive({ textAlign: 'right' })}
+                        icon={<AlignRight className="h-4 w-4" />}
+                        title="Align Right"
+                    />
+                 </div>
+                </>
+            )}
 
             {/* Formatting */}
-             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 ml-1">
                 <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
                     isActive={editor.isActive("bold")}
@@ -166,6 +247,15 @@ export function TiptapEditor({
                     icon={<UnderlineIcon className="h-4 w-4" />}
                     title="Underline"
                 />
+                
+                {isFullScreen && (
+                    <ToolbarButton
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }}
+                        isActive={editor.isActive("strike")}
+                        icon={<Strikethrough className="h-4 w-4" />}
+                        title="Strikethrough"
+                    />
+                )}
                 
                 {/* Highlight Color Picker */}
                 <div className="relative group">
@@ -214,7 +304,7 @@ export function TiptapEditor({
             </div>
 
             {/* Font Size Dropdown (Simple) */}
-            <div className="flex items-center gap-1 bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] px-2 py-1 h-8">
+            <div className="flex items-center gap-1 bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] px-2 py-1 h-8 ml-1">
                <Type className="h-3 w-3 text-[var(--text-muted)]" />
                <select 
                  className="bg-transparent text-xs text-[var(--text-primary)] focus:outline-none cursor-pointer w-16"
@@ -263,6 +353,16 @@ export function TiptapEditor({
                     icon={<Quote className="h-4 w-4" />}
                     title="Blockquote"
                 />
+                
+                {isFullScreen && (
+                     <ToolbarButton
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().setHorizontalRule().run(); }}
+                        isActive={false}
+                        icon={<Minus className="h-4 w-4" />}
+                        title="Horizontal Rule"
+                    />
+                )}
+                
                   <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleCodeBlock().run(); }}
                     isActive={editor.isActive("codeBlock")}
@@ -307,7 +407,9 @@ export function TiptapEditor({
         </>
       )}
       
-      <EditorContent editor={editor} />
+      <div className="editor-scroll-container flex-1 overflow-y-auto">
+        <EditorContent editor={editor} />
+      </div>
       {name && <input type="hidden" name={name} value={jsonContent} />}
     </div>
   );

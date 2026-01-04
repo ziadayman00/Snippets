@@ -26,8 +26,11 @@ export default function NewEntryPage() {
 
     try {
       await createEntry(formData);
+      router.push(`/technology/${params.id}`);
+      router.refresh(); 
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to create entry");
+      console.error(error);
+      alert("Failed to create entry");
       setLoading(false);
     }
   };

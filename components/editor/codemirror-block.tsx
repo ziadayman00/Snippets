@@ -52,31 +52,26 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             const content = update.state.doc.toString();
-            // Sync to Tiptap node using updateAttributes (usually doesn't trigger redraw for content props if handled this way?)
-            // Actually, for a Node View, we should ideally use `editor.commands` or similar? 
-            // But since this is a Node View, we can try to update the node content?
-            // Actually, TipTap recommends updating attributes for local state.
-            // But content is content.
-            // Let's rely on standard content update via transaction if possible.
-            // Or simpler: We just accept that TipTap might not know perfectly until we save?
-            // No, we need it for `jsonContent` state in editor.
-            
-            // To update node content from inside a Node View without recreating it:
+            // Sync to Tiptap
+            // Sync to Tiptap
             if (typeof props.getPos === 'function') {
                const pos = props.getPos();
-               const tr = props.editor.state.tr;
-               const { from, to, empty } = props.editor.state.selection;
                
-               // We replace the node content.
-               // Warning: This might trigger re-render loop if not careful.
-               // But our useEffect check [node.textContent] handles the return loop.
-               // We just need to make sure we don't destroy local cursor.
+               // Ensure pos is a valid number before using it
+               if (typeof pos !== 'number') return;
                
-               // Actually, `updateAttributes` is safest for attributes. Content is harder.
-               // Let's use `props.editor.view.dispatch` with a transaction replacing the content at `pos`.
+               // We must fetch the fresh node from the state to get correct nodeSize
+               // as props.node is stale in this closure
+               const currentNode = props.editor.state.doc.nodeAt(pos);
                
-               // But wait, replacing the node content in TipTap will re-render the node view?
-               // Yes, calling `setNodeMarkup` or changing content triggers update.
+               if (currentNode && currentNode.type.name === props.node.type.name) {
+                   const tr = props.editor.state.tr;
+                   // Replace the entire content of the code block with new content
+                   // pos + 1 is the start of content
+                   // pos + currentNode.nodeSize - 1 is the end of content
+                   tr.replaceWith(pos + 1, pos + currentNode.nodeSize - 1, props.editor.schema.text(content));
+                   props.editor.view.dispatch(tr);
+               }
             }
           }
         }),
@@ -100,53 +95,18 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
     };
   }, []); // Only run once on mount
 
-  // Sync content from CodeMirror -> TipTap (One-way sync implemented inside mount above conceptually, but needs implementation)
-  // Actually, syncing BACK to TipTap is complex because it re-triggers render.
-  // CodeMirror handles its own state perfectly. 
-  // If we only sync on SAVE, we are fine.
-  // But `onChange` in TiptapEditor depends on it.
-  
-  // Implementation for Sync Back:
-  useEffect(() => {
-    if (!viewRef.current) return;
-    
-    const listener = EditorView.updateListener.of((update) => {
-        if (update.docChanged && props.editor && typeof props.getPos === 'function') {
-            const content = update.state.doc.toString();
-            // We defer this slightly or check if it matches node content
-            if (content !== props.node.textContent) {
-                 // We need to update TipTap's model of this node.
-                 // We can use a custom command or transaction that doesn't force re-render?
-                 // Or we rely on `React.memo` to ignore the update.
-                 
-                 // Using `editor.commands.command`...
-                 // props.editor.chain().command(({ tr }) => {
-                 //     tr.insertText(content, pos + 1, pos + 1 + node.content.size)
-                 // }).run()
-                 
-                 // Let's just suppress sync back for now to ensure STABILITY if user didn't ask for it.
-                 // User asked "why flashing". Flashing comes from re-renders.
-                 // Syncing causes re-renders.
-                 // So avoiding sync might be the key to avoiding flash, at cost of "TipTap doesn't know".
-                 // But if TipTap doesn't know, Save saves empty.
-                 // So we MUST sync.
-                 
-                 // Strategy:
-                 // Update TipTap.
-                 // `memo` prevents React re-render.
-                 // `useEffect` prevents CodeMirror re-init.
-                 // Stability achieved.
-            }
-        }
-    });
-    
-    // Actually, we can add this extension dynamically or just in mount.
-    // I will add it to mount extensions in the real code block above.
-  }, []);
+  // Sync content from CodeMirror -> TipTap (One-way sync implemented inside mount above)
+  // We removed the secondary listener effect to avoid duplication
 
   // Sync content from TipTap -> CodeMirror (External updates)
   useEffect(() => {
-    if (viewRef.current && node.textContent !== viewRef.current.state.doc.toString()) {
+    if (!viewRef.current) return;
+    
+    // CRITICAL: Do not overwrite if the user is currently typing (has focus)
+    // This prevents the cursor from jumping back or "fighting" the user
+    if (viewRef.current.hasFocus) return;
+
+    if (node.textContent !== viewRef.current.state.doc.toString()) {
       const transaction = viewRef.current.state.update({
         changes: { 
           from: 0, 
@@ -179,7 +139,7 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
   };
 
   return (
-    <NodeViewWrapper className="code-block my-4 overflow-hidden rounded-lg border border-[var(--border-primary)] bg-[#1e1e1e] shadow-sm">
+    <NodeViewWrapper dir="ltr" className="code-block my-4 overflow-hidden rounded-lg border border-[var(--border-primary)] bg-[#1e1e1e] shadow-sm">
       {/* Header */}
       <div
         className="flex items-center justify-between border-b border-[#2a2a2a] bg-[#252526] px-4 py-2 select-none"

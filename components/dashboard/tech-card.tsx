@@ -94,14 +94,20 @@ export function TechCard({ id, name, count = 0 }: TechCardProps) {
                 align="end"
               >
                 <DropdownMenu.Item
-                  onClick={() => setIsRenameOpen(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsRenameOpen(true);
+                  }}
                   className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium text-[var(--text-primary)] outline-none hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
                 >
                   <Pencil className="mr-2 h-4 w-4" />
                   Rename
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
-                  onClick={handleDelete}
+                  onClick={(e) => {
+                   e.stopPropagation();
+                   handleDelete();
+                  }}
                   className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium text-[var(--destructive)] outline-none hover:bg-[var(--destructive)]/10 hover:text-[var(--destructive)]"
                 >
                   <Trash className="mr-2 h-4 w-4" />

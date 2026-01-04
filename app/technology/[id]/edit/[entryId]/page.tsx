@@ -1,5 +1,6 @@
-import { Header } from "@/components/dashboard/header";
+
 import { TiptapEditor } from "@/components/editor/tiptap-editor";
+import { EditorGuide } from "@/components/editor/editor-guide";
 import { updateEntry } from "@/lib/actions/entry";
 import { db } from "@/lib/drizzle/db";
 import { entries, technologies } from "@/lib/drizzle/schema";
@@ -10,8 +11,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 
-export default async function EditEntryPage({
-  params,
+
+ export default async function EditEntryPage({
+ params,
 }: {
   params: Promise<{ id: string; entryId: string }>;
 }) {
@@ -51,7 +53,7 @@ export default async function EditEntryPage({
 
   return (
     <div className="flex h-screen flex-col bg-[var(--bg-primary)]">
-      <Header email={user.email} />
+
 
       <main className="flex-1 flex flex-col min-h-0">
         <form action={updateEntry} className="container mx-auto flex h-full max-w-5xl flex-col px-4 sm:px-6 py-4 sm:py-6">
@@ -99,6 +101,8 @@ export default async function EditEntryPage({
           </div>
 
           <div className="flex flex-1 flex-col gap-4 sm:gap-6 overflow-hidden">
+             <EditorGuide />
+             
             <input
               type="text"
               name="title"

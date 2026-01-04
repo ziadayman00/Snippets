@@ -51,7 +51,7 @@ export async function createEntry(formData: FormData) {
     throw new Error("Failed to create entry");
   }
   
-  redirect(`/technology/${technologyId}`);
+  return { success: true };
 }
 
 export async function deleteEntry(id: string, technologyId: string) {
