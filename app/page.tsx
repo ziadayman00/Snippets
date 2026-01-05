@@ -149,8 +149,8 @@ export default async function Home() {
               {/* After: AI Chat */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="h-8 w-8 rounded-full bg-[var(--accent-primary)]/10 flex items-center justify-center">
-                    <span className="text-[var(--accent-primary)] text-lg">✓</span>
+                  <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                    <span className="text-emerald-400 text-lg">✓</span>
                   </div>
                   <h3 className="text-xl font-semibold">The Snippets Way</h3>
                 </div>
