@@ -3,10 +3,10 @@ import { db } from "@/lib/drizzle/db";
 import { entries, technologies } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
 import { desc, eq } from "drizzle-orm";
-import { ArrowLeft, Plus, FileText } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { EntryCard } from "@/components/dashboard/entry-card";
+import { SnippetList } from "@/components/dashboard/snippet-list";
 
 export default async function TechnologyPage({
   params,
@@ -75,24 +75,7 @@ export default async function TechnologyPage({
           </Link>
         </div>
 
-        <div className="space-y-3 sm:space-y-4">
-          {technologyEntries.length === 0 ? (
-            <div className="flex min-h-[250px] sm:min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border-primary)] bg-[var(--bg-secondary)]/50 p-6 sm:p-8 text-center text-[var(--text-muted)]">
-              <FileText className="h-10 w-10 sm:h-12 sm:w-12 mb-3 sm:mb-4 opacity-50" />
-              <p className="text-sm sm:text-base max-w-[320px]">
-                No entries yet. Click "New Entry" to add your first snippet.
-              </p>
-            </div>
-          ) : (
-            technologyEntries.map((entry) => (
-              <EntryCard 
-                key={entry.id} 
-                entry={entry} 
-                technologyId={id} 
-              />
-            ))
-          )}
-        </div>
+        <SnippetList entries={technologyEntries} technologyId={id} />
       </main>
     </div>
   );

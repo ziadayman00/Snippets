@@ -1,6 +1,6 @@
 "use client";
 
-import { Info, X } from "lucide-react";
+import { Info, X, Keyboard } from "lucide-react";
 import { useState } from "react";
 
 export function EditorGuide() {
@@ -9,28 +9,35 @@ export function EditorGuide() {
   if (!isVisible) return null;
 
   return (
-    <div className="mb-2 flex items-start gap-4 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-secondary)] shadow-sm animate-in fade-in slide-in-from-top-2 relative group">
-      <div className="flex items-center gap-2 font-medium text-[var(--text-primary)] shrink-0">
-        <Info className="h-4 w-4 text-[var(--accent-primary)]" />
-        <span>Quick Tips:</span>
+    <div className="mt-4 rounded-md border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-3 text-xs text-[var(--text-secondary)]">
+      <div className="mb-2 flex items-center justify-between">
+         <h4 className="flex items-center gap-1.5 font-medium text-[var(--text-primary)]">
+            <Keyboard className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+            Shortcuts
+         </h4>
+         <button 
+            onClick={() => setIsVisible(false)}
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            title="Dismiss Tips"
+         >
+            <X className="h-3 w-3" />
+         </button>
       </div>
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-         <ul className="space-y-1 list-disc list-outside ml-4">
-             <li>Click <span className="font-mono text-xs bg-[var(--bg-tertiary)] px-1 rounded">{"{ }"}</span> in the toolbar to insert a code block.</li>
-             <li>Switch to <strong>Full Screen</strong> mode to see more tools (Undo, Redo, Alignment).</li>
-         </ul>
-          <ul className="space-y-1 list-disc list-outside ml-4">
-             <li>Select any text to see a quick formatting menu.</li>
-             <li>Use the "Printer" icon in Full Screen mode to export as PDF.</li>
-         </ul>
-      </div>
-      <button 
-        onClick={() => setIsVisible(false)}
-        className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors absolute top-2 right-2 md:static"
-        title="Dismiss"
-      >
-        <X className="h-4 w-4" />
-      </button>
+      
+      <ul className="space-y-1.5 opacity-80">
+          <li className="flex items-start gap-2">
+             <kbd className="shrink-0 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] px-1 rounded text-[10px] font-mono">@</kbd>
+             <span>Link another snippet</span>
+          </li>
+          <li className="flex items-start gap-2">
+             <kbd className="shrink-0 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] px-1 rounded text-[10px] font-mono">{"{ }"}</kbd>
+             <span>Code block</span>
+          </li>
+          <li className="flex items-start gap-2">
+             <kbd className="shrink-0 bg-[var(--bg-tertiary)] border border-[var(--border-primary)] px-1 rounded text-[10px] font-mono">Cmd+K</kbd>
+             <span>Full screen</span>
+          </li>
+      </ul>
     </div>
   );
 }

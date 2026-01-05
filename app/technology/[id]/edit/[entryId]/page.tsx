@@ -61,62 +61,54 @@ export default async function EditEntryPage({
           <input type="hidden" name="technologyId" value={id} />
           <input type="hidden" name="entryId" value={entryId} />
           
-          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 shrink-0">
-            <div className="flex items-start gap-3 sm:gap-4">
+          {/* Header Actions */}
+          <div className="mb-8 flex items-center justify-between gap-4 sticky top-0 z-20 bg-[var(--bg-primary)]/95 backdrop-blur py-2">
+            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
               <Link
                 href={`/technology/${id}`}
-                className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] transition-colors hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
+                className="group flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)] transition-colors hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"
               >
-                <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-0.5" />
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               </Link>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-[var(--text-secondary)]">
-                  <Link href="/dashboard" className="hover:text-[var(--text-primary)] truncate">
-                    Dashboard
-                  </Link>
-                  <span>/</span>
-                  <Link
-                    href={`/technology/${id}`}
-                    className="hover:text-[var(--text-primary)] truncate"
-                  >
-                    {tech.name}
-                  </Link>
-                  <span>/</span>
-                  <span className="truncate">Edit</span>
-                </div>
-                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
-                  Edit Entry
-                </h1>
+              <div className="h-4 w-px bg-[var(--border-primary)] mx-2" />
+              <div className="flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
+                 <span className="truncate max-w-[150px]">{tech.name}</span>
+                 <span>/</span>
+                 <span>Edit</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                type="submit"
-                className="flex items-center justify-center gap-2 rounded-md bg-[var(--text-primary)] px-4 py-2 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90 w-full sm:w-auto"
-              >
-                <Save className="h-4 w-4" />
-                <span>Save Changes</span>
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="flex items-center justify-center gap-2 rounded-md bg-[var(--text-primary)] px-4 py-2 text-sm font-medium text-[var(--bg-primary)] shadow-sm transition-all hover:opacity-90 active:scale-95"
+            >
+              <Save className="h-4 w-4" />
+              <span>Save</span>
+            </button>
           </div>
 
-          <div className="flex flex-1 flex-col gap-4 overflow-hidden">
+          <div className="flex flex-1 flex-col gap-6 overflow-hidden max-w-5xl mx-auto w-full">
              
-            <input
-              type="text"
-              name="title"
-              placeholder="Entry Title..."
-              defaultValue={entry.title}
-              className="w-full shrink-0 bg-transparent text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
-              required
-              autoFocus
-            />
+            {/* Title Input */}
+            <div className="px-6 lg:px-0">
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Untitled Snippet"
+                  defaultValue={entry.title}
+                  className="w-full bg-transparent text-4xl sm:text-5xl font-bold tracking-tight text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none border-b border-transparent focus:border-[var(--border-primary)] pb-2 transition-colors"
+                  required
+                  autoFocus
+                  autoComplete="off"
+                />
+            </div>
 
             <EntryEditorWrapper 
+                entryId={entryId}
                 initialContent={entry.content}
                 incomingLinks={entry.incomingLinks}
                 initialOutgoingLinks={entry.outgoingLinks}
+                lastUpdated={entry.updatedAt}
             />
           </div>
         </form>

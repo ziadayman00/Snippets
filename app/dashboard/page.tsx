@@ -11,6 +11,7 @@ import { formatDistanceToNow, differenceInHours } from "date-fns";
 import { Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getReviewSnippets, getReviewCount } from "@/lib/actions/review";
+import { OnboardingCard } from "@/components/dashboard/onboarding-card";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -124,7 +125,7 @@ export default async function DashboardPage() {
               <h2 className="text-sm font-bold uppercase tracking-widest">Focus</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {recentEntries.map((entry) => (
                     <Link
                         key={entry.id}
@@ -205,11 +206,7 @@ export default async function DashboardPage() {
              </div>
 
              {userTechnologies.length === 0 ? (
-               <div className="flex min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border-primary)] bg-[var(--bg-secondary)]/50 p-6 sm:p-8 text-center text-[var(--text-muted)]">
-                 <p className="max-w-[420px] text-sm sm:text-base">
-                   No technologies found. Start by adding a technology.
-                 </p>
-               </div>
+               <OnboardingCard />
              ) : (
                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                  {userTechnologies.map((tech) => (

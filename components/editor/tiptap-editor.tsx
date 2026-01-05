@@ -9,7 +9,7 @@ import {
   Bold, Italic, Code, List, ListOrdered, Quote, 
   Underline as UnderlineIcon, Highlighter, Type, 
   Heading1, Heading2, Heading3, ChevronDown,
-  Maximize2, Minimize2,
+  Maximize2, Minimize2, SidebarClose, SidebarOpen,
   Undo, Redo, Strikethrough, Minus, 
   AlignLeft, AlignCenter, AlignRight
 } from "lucide-react";
@@ -27,6 +27,9 @@ interface EditorProps {
   editable?: boolean;
   name?: string; // For form submission
   className?: string; // Allow custom sizing
+  onSidebarToggle?: () => void;
+  isSidebarOpen?: boolean;
+  currentEntryId?: string;
 }
 
 // Custom Heading to enforce specific Tailwind classes for visual hierarchy
@@ -52,91 +55,6 @@ import tippy from 'tippy.js';
 import { MentionList } from './mention-list';
 import { searchSnippets } from '@/lib/actions/links';
 
-// Define extensions
-const extensions = [
-  StarterKit.configure({
-    heading: false, // Usage of CustomHeading instead
-    codeBlock: false, // Usage of CodeBlockLowlight
-  }),
-  CustomHeading,
-  CodeBlockLowlight.extend({
-    addNodeView() {
-      return ReactNodeViewRenderer(CodeMirrorBlock);
-    },
-  }).configure({
-    lowlight,
-  }),
-  Marker,
-  Underline,
-  FontSize,
-  TextAlign.configure({
-    types: ['heading', 'paragraph'],
-  }),
-  Mention.configure({
-    HTMLAttributes: {
-      class: 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded px-1 py-0.5 font-medium decoration-clone',
-    },
-    suggestion: {
-      items: async ({ query }) => {
-        // Fetch 5 snippets matching the query
-        return await searchSnippets(query);
-      },
-      render: () => {
-        let component: ReactRenderer;
-        let popup: any;
-
-        return {
-          onStart: (props: any) => {
-            component = new ReactRenderer(MentionList, {
-                props,
-                editor: props.editor,
-            });
-
-            if (!props.clientRect) {
-                return;
-            }
-
-            // @ts-ignore
-            popup = tippy('body', {
-                getReferenceClientRect: props.clientRect,
-                appendTo: () => document.body,
-                content: component.element,
-                showOnCreate: true,
-                interactive: true,
-                trigger: 'manual',
-                placement: 'bottom-start',
-            });
-          },
-          onUpdate(props: any) {
-            component.updateProps(props);
-
-            if (!props.clientRect) {
-                return;
-            }
-
-            popup[0].setProps({
-                getReferenceClientRect: props.clientRect,
-            });
-          },
-          onKeyDown(props: any) {
-            if (props.event.key === 'Escape') {
-                popup[0].hide();
-                return true;
-            }
-
-            // @ts-ignore
-            return component.ref?.onKeyDown(props);
-          },
-          onExit() {
-            popup[0].destroy();
-            component.destroy();
-          },
-        };
-      },
-    },
-  }),
-];
-
 // Highlight colors palette
 const HIGHLIGHT_COLORS = [
     { label: "Yellow", value: "#facc15" },
@@ -153,25 +71,120 @@ export function TiptapEditor({
   editable = true,
   name,
   className = "",
+  onSidebarToggle,
+  isSidebarOpen = true,
+  currentEntryId,
 }: EditorProps) {
   const [jsonContent, setJsonContent] = useState(content);
   const [menuStyle, setMenuStyle] = useState<{ top: number; left: number } | null>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   // Toggle full screen
-  const toggleFullScreen = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsFullScreen(!isFullScreen);
+  const toggleFullScreen = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    setIsFullScreen(prev => !prev);
   };
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Toggle Full Screen: Cmd+K or Ctrl+K
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsFullScreen(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const editor = useEditor({
-    extensions, 
+    extensions: [
+      StarterKit.configure({
+         heading: false,
+         codeBlock: false,
+      }),
+      CustomHeading,
+      CodeBlockLowlight.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeMirrorBlock);
+        }
+      }).configure({ lowlight }),
+      Marker,
+      Underline,
+      FontSize,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Mention.configure({
+        HTMLAttributes: {
+          class: 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded px-1 py-0.5 font-medium decoration-clone',
+        },
+        suggestion: {
+          items: async ({ query }) => {
+            // Fetchsnippets matching the query, excluding current entry
+            return await searchSnippets(query, currentEntryId);
+          },
+          render: () => {
+             // ... existing render ...
+             let component: ReactRenderer;
+             let popup: any;
+     
+             return {
+               onStart: (props: any) => {
+                 component = new ReactRenderer(MentionList, {
+                     props,
+                     editor: props.editor,
+                 });
+     
+                 if (!props.clientRect) {
+                     return;
+                 }
+     
+                 // @ts-ignore
+                 popup = tippy('body', {
+                     getReferenceClientRect: props.clientRect,
+                     appendTo: () => document.body,
+                     content: component.element,
+                     showOnCreate: true,
+                     interactive: true,
+                     trigger: 'manual',
+                     placement: 'bottom-start',
+                 });
+               },
+               onUpdate(props: any) {
+                 component.updateProps(props);
+     
+                 if (!props.clientRect) {
+                     return;
+                 }
+     
+                 popup[0].setProps({
+                     getReferenceClientRect: props.clientRect,
+                 });
+               },
+               onKeyDown(props: any) {
+                 if (props.event.key === 'Escape') {
+                     popup[0].hide();
+                     return true;
+                 }
+     
+                 // @ts-ignore
+                 return component.ref?.onKeyDown(props);
+               },
+               onExit() {
+                 popup[0].destroy();
+                 component.destroy();
+               },
+             };
+          },
+        },
+      }),
+    ],
     content: content ? JSON.parse(content) : "", 
     editable,
     editorProps: {
       attributes: {
-        class:
-          "prose prose-invert max-w-none focus:outline-none min-h-full px-6 py-6 text-[var(--text-primary)] mx-auto container",
+        class: "prose prose-invert max-w-none focus:outline-none min-h-full px-6 py-6 text-[var(--text-primary)] mx-auto container",
         dir: "auto",
       },
     },
@@ -212,92 +225,69 @@ export function TiptapEditor({
     >
       {editable && (
         <>
-            <div className={`editor-toolbar flex flex-wrap gap-1 border-b border-[var(--border-primary)] bg-[var(--bg-tertiary)] p-2 items-center ${isFullScreen ? 'px-4 py-3' : ''}`}>
+            <div className={`editor-toolbar sticky top-0 z-10 flex flex-wrap gap-1 border-b border-[var(--border-primary)] bg-[var(--bg-tertiary)]/95 backdrop-blur p-2 items-center ${isFullScreen ? 'px-4 py-3' : ''}`}>
             
-            {/* Full Screen Toggle */}
-            <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 mr-1 gap-1">
-               <ToolbarButton
-                  onClick={toggleFullScreen}
-                  isActive={isFullScreen}
-                  icon={isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                  title={isFullScreen ? "Minimize" : "Full Screen"}
-               />
-            </div>
-            
-            <div className="mx-1 h-6 w-px bg-[var(--border-primary)]" />
+             {/* Sidebar Toggle (First Item) */}
+             {onSidebarToggle && !isFullScreen && (
+                 <>
+                    <div className="hidden lg:flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 mr-1">
+                        <ToolbarButton
+                            onClick={(e) => { e.preventDefault(); onSidebarToggle(); }}
+                            isActive={false} // Always strictly a button, not a "state" toggle in terms of active highlighting
+                            icon={isSidebarOpen ? <SidebarClose className="h-4 w-4" /> : <SidebarOpen className="h-4 w-4" />}
+                            title={isSidebarOpen ? "Hide Sidebar (Focus Mode)" : "Show Sidebar"}
+                        />
+                    </div>
+                    <div className="hidden lg:block mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+                 </>
+             )}
 
-            {/* History (Full Screen Only) */}
-            {isFullScreen && (
-                <>
-                <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
-                    <ToolbarButton
-                        onClick={(e) => { e.preventDefault(); editor.chain().focus().undo().run(); }}
-                        isActive={false}
-                        icon={<Undo className="h-4 w-4" />}
-                        title="Undo"
-                    />
-                    <ToolbarButton
-                        onClick={(e) => { e.preventDefault(); editor.chain().focus().redo().run(); }}
-                        isActive={false}
-                        icon={<Redo className="h-4 w-4" />}
-                        title="Redo"
-                    />
-                </div>
-                <div className="mx-1 h-6 w-px bg-[var(--border-primary)]" />
-                </>
-            )}
-            
-            {/* Headers */}
-            <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+             {/* History Group */}
+             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
                 <ToolbarButton
-                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 1 }).run(); }}
-                    isActive={editor.isActive("heading", { level: 1 })}
-                    icon={<Heading1 className="h-4 w-4" />}
-                    title="Heading 1"
+                    onClick={(e) => { e.preventDefault(); editor.chain().focus().undo().run(); }}
+                    isActive={false}
+                    icon={<Undo className="h-4 w-4" />}
+                    title="Undo"
                 />
                 <ToolbarButton
-                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run(); }}
-                    isActive={editor.isActive("heading", { level: 2 })}
-                    icon={<Heading2 className="h-4 w-4" />}
-                    title="Heading 2"
+                    onClick={(e) => { e.preventDefault(); editor.chain().focus().redo().run(); }}
+                    isActive={false}
+                    icon={<Redo className="h-4 w-4" />}
+                    title="Redo"
                 />
-                 <ToolbarButton
-                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 3 }).run(); }}
-                    isActive={editor.isActive("heading", { level: 3 })}
-                    icon={<Heading3 className="h-4 w-4" />}
-                    title="Heading 3"
-                />
-            </div>
-            
-            {/* Alignment (Full Screen Only) */}
-            {isFullScreen && (
-                <>
-                 <div className="mx-1 h-6 w-px bg-[var(--border-primary)]" />
-                 <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+             </div>
+
+             <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+
+             {/* Style Group (Headings) */}
+             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+                 <div className="flex items-center">
                     <ToolbarButton
-                        onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('left').run(); }}
-                        isActive={editor.isActive({ textAlign: 'left' })}
-                        icon={<AlignLeft className="h-4 w-4" />}
-                        title="Align Left"
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 1 }).run(); }}
+                        isActive={editor.isActive("heading", { level: 1 })}
+                        icon={<Heading1 className="h-4 w-4" />}
+                        title="Heading 1"
                     />
                     <ToolbarButton
-                        onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('center').run(); }}
-                        isActive={editor.isActive({ textAlign: 'center' })}
-                        icon={<AlignCenter className="h-4 w-4" />}
-                        title="Align Center"
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run(); }}
+                        isActive={editor.isActive("heading", { level: 2 })}
+                        icon={<Heading2 className="h-4 w-4" />}
+                        title="Heading 2"
                     />
                     <ToolbarButton
-                        onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('right').run(); }}
-                        isActive={editor.isActive({ textAlign: 'right' })}
-                        icon={<AlignRight className="h-4 w-4" />}
-                        title="Align Right"
+                        onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 3 }).run(); }}
+                        isActive={editor.isActive("heading", { level: 3 })}
+                        icon={<Heading3 className="h-4 w-4" />}
+                        title="Heading 3"
                     />
                  </div>
-                </>
-            )}
+             </div>
 
-            {/* Formatting */}
-             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 ml-1">
+             <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+
+             {/* Formatting Group */}
+             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
                 <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
                     isActive={editor.isActive("bold")}
@@ -316,18 +306,20 @@ export function TiptapEditor({
                     icon={<UnderlineIcon className="h-4 w-4" />}
                     title="Underline"
                 />
-                
-                {isFullScreen && (
-                    <ToolbarButton
+                <ToolbarButton
                         onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }}
                         isActive={editor.isActive("strike")}
                         icon={<Strikethrough className="h-4 w-4" />}
                         title="Strikethrough"
-                    />
-                )}
-                
-                {/* Highlight Color Picker */}
-                <div className="relative group">
+                />
+                 <ToolbarButton
+                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleCode().run(); }}
+                    isActive={editor.isActive("code")}
+                    icon={<Code className="h-4 w-4" />}
+                    title="Inline Code"
+                />
+                 {/* Highlight Color Picker */}
+                 <div className="relative group border-l border-[var(--border-primary)]/50 ml-0.5 pl-0.5">
                     <button 
                          className={`flex h-7 px-1 items-center justify-center rounded-sm transition-colors gap-0.5 ${
                             editor.isActive("marker")
@@ -340,7 +332,6 @@ export function TiptapEditor({
                         <Highlighter className="h-4 w-4" />
                         <ChevronDown className="h-3 w-3 opacity-50" />
                     </button>
-                    {/* Simplified Dropdown */}
                     <div className="absolute top-full left-0 z-50 hidden group-hover:flex flex-col bg-[var(--bg-tertiary)] border border-[var(--border-primary)] rounded-md shadow-lg p-1 min-w-[120px]">
                          {HIGHLIGHT_COLORS.map(color => (
                              <button
@@ -363,46 +354,35 @@ export function TiptapEditor({
                          </button>
                     </div>
                 </div>
-
-                 <ToolbarButton
-                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleCode().run(); }}
-                    isActive={editor.isActive("code")}
-                    icon={<Code className="h-4 w-4" />}
-                    title="Inline Code"
-                />
             </div>
 
-            {/* Font Size Dropdown (Simple) */}
-            <div className="flex items-center gap-1 bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] px-2 py-1 h-8 ml-1">
-               <Type className="h-3 w-3 text-[var(--text-muted)]" />
-               <select 
-                 className="bg-transparent text-xs text-[var(--text-primary)] focus:outline-none cursor-pointer w-16"
-                 onChange={(e) => {
-                    const val = e.target.value;
-                    if(val === 'default') {
-                        editor.chain().focus().unsetFontSize().run();
-                    } else {
-                        editor.chain().focus().setFontSize(val).run();
-                    }
-                 }}
-                 value={editor.getAttributes('fontSize').size || 'default'}
-               >
-                 <option value="default">Auto</option>
-                 <option value="12px">12</option>
-                 <option value="14px">14</option>
-                 <option value="16px">16</option>
-                 <option value="18px">18</option>
-                 <option value="20px">20</option>
-                 <option value="24px">24</option>
-                 <option value="30px">30</option>
-                 <option value="36px">36</option>
-                 <option value="48px">48</option>
-               </select>
-            </div>
-
-            <div className="mx-1 h-6 w-px bg-[var(--border-primary)]" />
+            <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
             
-            {/* Lists & Blocks */}
+            {/* Alignment Group */}
+             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+                <ToolbarButton
+                    onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('left').run(); }}
+                    isActive={editor.isActive({ textAlign: 'left' })}
+                    icon={<AlignLeft className="h-4 w-4" />}
+                    title="Align Left"
+                />
+                <ToolbarButton
+                    onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('center').run(); }}
+                    isActive={editor.isActive({ textAlign: 'center' })}
+                    icon={<AlignCenter className="h-4 w-4" />}
+                    title="Align Center"
+                />
+                 <ToolbarButton
+                    onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('right').run(); }}
+                    isActive={editor.isActive({ textAlign: 'right' })}
+                    icon={<AlignRight className="h-4 w-4" />}
+                    title="Align Right"
+                />
+             </div>
+
+             <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+
+             {/* Lists & Insert Group */}
             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
                 <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run(); }}
@@ -416,29 +396,40 @@ export function TiptapEditor({
                     icon={<ListOrdered className="h-4 w-4" />}
                     title="Ordered List"
                 />
-                <ToolbarButton
+                 <div className="w-px h-5 bg-[var(--border-primary)]/50 mx-0.5" />
+                 <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBlockquote().run(); }}
                     isActive={editor.isActive("blockquote")}
                     icon={<Quote className="h-4 w-4" />}
                     title="Blockquote"
                 />
-                
-                {isFullScreen && (
-                     <ToolbarButton
+                 <ToolbarButton
+                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleCodeBlock().run(); }}
+                    isActive={editor.isActive("codeBlock")}
+                    icon={<span className="font-mono text-xs font-bold">{"{}"}</span>}
+                    title="Code Block"
+                />
+                <ToolbarButton
                         onClick={(e) => { e.preventDefault(); editor.chain().focus().setHorizontalRule().run(); }}
                         isActive={false}
                         icon={<Minus className="h-4 w-4" />}
                         title="Horizontal Rule"
-                    />
-                )}
-                
-                  <ToolbarButton
-                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleCodeBlock().run(); }}
-                    isActive={editor.isActive("codeBlock")}
-                    icon={<span className="font-mono text-xs">{"{ }"}</span>}
-                    title="Code Block"
                 />
             </div>
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+             {/* Full Screen Toggle */}
+            <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 ml-1">
+               <ToolbarButton
+                  onClick={toggleFullScreen}
+                  isActive={isFullScreen}
+                  icon={isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                  title={isFullScreen ? "Minimize" : "Full Screen"}
+               />
+            </div>
+
             </div>
 
             {/* Manual Bubble Menu (Updated) */}
