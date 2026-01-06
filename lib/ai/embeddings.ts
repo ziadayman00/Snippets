@@ -29,28 +29,40 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
  * Extract searchable text from a snippet entry
  * Combines title and content for better semantic search
  */
+/**
+ * Extract searchable text from a snippet entry
+ * Structures content with labels for better semantic understanding
+ */
 export function extractSearchableText(title: string, content: any): string {
-  // Convert TipTap JSON to plain text
+  // Convert TipTap JSON to structured text
   const contentText = extractTextFromTiptap(content);
   
-  // Combine title (weighted more) with content
-  return `${title}\n\n${contentText}`;
+  // Structure the text for the embedding model
+  return `Title: ${title}\n\n${contentText}`;
 }
 
 /**
- * Recursively extract text from TipTap JSON structure
+ * Recursively extract text from TipTap JSON structure with context labels
  */
 function extractTextFromTiptap(node: any): string {
   if (!node) return '';
   
-  // If it's a text node, return the text
-  if (node.type === 'text') {
-    return node.text || '';
+  // If it's a code block, wrap it with language context
+  if (node.type === 'codeBlock' && node.content) {
+    const language = node.attrs?.language || 'code';
+    const code = node.content.map((n: any) => n.text || '').join('\n');
+    return `\nCode (${language}):\n${code}\n`;
   }
   
-  // If it's a code block, extract the code
-  if (node.type === 'codeBlock' && node.content) {
-    return node.content.map((n: any) => extractTextFromTiptap(n)).join('\n');
+  // If it's a heading, make it distinct
+  if (node.type === 'heading' && node.content) {
+    const text = node.content.map((n: any) => n.text || '').join('');
+    return `\nSection: ${text}\n`;
+  }
+
+  // Normal text
+  if (node.type === 'text') {
+    return node.text || '';
   }
   
   // Recursively process content array

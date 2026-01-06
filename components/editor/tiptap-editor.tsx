@@ -2,8 +2,10 @@
 
 import { useEditor, EditorContent, ReactNodeViewRenderer, mergeAttributes } from "@tiptap/react";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import StarterKit from "@tiptap/starter-kit";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import Highlight from "@tiptap/extension-highlight";
 import { common, createLowlight } from "lowlight";
 import { 
   Bold, Italic, Code, List, ListOrdered, Quote, 
@@ -78,6 +80,7 @@ export function TiptapEditor({
   const [jsonContent, setJsonContent] = useState(content);
   const [menuStyle, setMenuStyle] = useState<{ top: number; left: number } | null>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const searchParams = useSearchParams();
 
   // Toggle full screen
   const toggleFullScreen = (e?: React.MouseEvent) => {
@@ -111,6 +114,12 @@ export function TiptapEditor({
           return ReactNodeViewRenderer(CodeMirrorBlock);
         }
       }).configure({ lowlight }),
+      Highlight.configure({
+        multicolor: true,
+        HTMLAttributes: {
+          class: 'search-highlight',
+        },
+      }),
       Marker,
       Underline,
       FontSize,
@@ -210,6 +219,64 @@ export function TiptapEditor({
     },
     immediatelyRender: false, 
   });
+
+  // Handle search highlighting from URL parameter
+  useEffect(() => {
+    if (!editor) return;
+    
+    const highlightQuery = searchParams?.get('highlight');
+    if (!highlightQuery) return;
+
+    // Wait for editor to be ready
+    setTimeout(() => {
+      const { state } = editor;
+      const { doc } = state;
+      let foundPosition: number | null = null;
+
+      // Search through the document text
+      doc.descendants((node, pos) => {
+        if (foundPosition !== null) return false;
+        
+        if (node.isText && node.text) {
+          const text = node.text.toLowerCase();
+          const query = highlightQuery.toLowerCase();
+          const index = text.indexOf(query);
+          
+          if (index !== -1) {
+            foundPosition = pos + index;
+            
+            // Apply temporary highlight to the found text
+            const from = pos + index;
+            const to = from + highlightQuery.length;
+            
+            editor.chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .setHighlight({ color: '#6a6a6a' }) // Subtle gray highlight
+              .run();
+            
+            // Scroll to the highlighted text
+            const coords = editor.view.coordsAtPos(from);
+            window.scrollTo({
+              top: coords.top - 100,
+              behavior: 'smooth'
+            });
+            
+            // Remove highlight after 3 seconds
+            setTimeout(() => {
+              editor.chain()
+                .setTextSelection({ from, to })
+                .unsetHighlight()
+                .blur()
+                .run();
+            }, 3000);
+            
+            return false;
+          }
+        }
+      });
+    }, 300);
+  }, [editor, searchParams]);
 
   if (!editor) {
     return null;

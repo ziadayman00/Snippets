@@ -184,3 +184,29 @@ export async function getSuggestedQuestions(): Promise<string[]> {
     ];
   }
 }
+
+/**
+ * Generate follow-up questions based on the current Q&A
+ */
+export async function generateFollowUpQuestions(
+  question: string,
+  answer: string
+): Promise<string[]> {
+  try {
+    const { text } = await generateText({
+      model: google("gemini-2.5-flash"),
+      system: "You are a helpful study assistant. Generate 3 short, specific follow-up questions based on the user's question and the answer provided. The follow-ups should help deepen understanding. Return ONLY the questions, one per line, without numbering.",
+      prompt: `Question: ${question}\n\nAnswer: ${answer}\n\nGenerate 3 follow-up questions:`,
+      temperature: 0.7,
+    });
+
+    return text
+      .split("\n")
+      .map((q) => q.replace(/^[0-9-.]+\s*/, "").trim())
+      .filter((q) => q.length > 0)
+      .slice(0, 3);
+  } catch (error) {
+    console.error("Failed to generate follow-ups:", error);
+    return [];
+  }
+}

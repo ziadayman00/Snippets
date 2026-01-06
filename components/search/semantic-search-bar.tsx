@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Loader2, FileText } from "lucide-react";
+import { Search, Loader2, FileText, Filter, X, Check } from "lucide-react";
 import { semanticSearch } from "@/lib/actions/search";
+import { getTechnologies } from "@/lib/actions/technology";
 import Link from "next/link";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface SearchResult {
   id: string;
@@ -17,22 +19,39 @@ interface SearchResult {
   similarity?: number;
 }
 
+interface Technology {
+  id: string;
+  name: string;
+  icon: string | null;
+}
+
 export function SemanticSearchBar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  
+  // Filter state
+  const [technologies, setTechnologies] = useState<Technology[]>([]);
+  const [selectedTechId, setSelectedTechId] = useState<string | undefined>(undefined);
+  const [showFilters, setShowFilters] = useState(false);
+
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    // Fetch technologies on mount
+    getTechnologies().then(setTechnologies);
+  }, []);
+
   const debouncedQuery = useDebounce(query, 300);
 
-  const performSearch = useCallback(async (searchQuery: string) => {
+  const performSearch = useCallback(async (searchQuery: string, techId?: string) => {
     setIsSearching(true);
     setSelectedIndex(-1);
     try {
-      const searchResults = await semanticSearch(searchQuery, 7);
+      const searchResults = await semanticSearch(searchQuery, 7, techId);
       setResults(searchResults);
     } catch (error) {
       console.error("Search failed:", error);
@@ -44,13 +63,13 @@ export function SemanticSearchBar() {
 
   useEffect(() => {
     if (debouncedQuery.trim().length > 0) {
-      performSearch(debouncedQuery);
+      performSearch(debouncedQuery, selectedTechId);
       setIsOpen(true);
     } else {
       setResults([]);
       setIsOpen(false);
     }
-  }, [debouncedQuery, performSearch]);
+  }, [debouncedQuery, selectedTechId, performSearch]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen || results.length === 0) return;
@@ -68,7 +87,7 @@ export function SemanticSearchBar() {
         e.preventDefault();
         if (selectedIndex >= 0 && results[selectedIndex]) {
           const result = results[selectedIndex];
-          router.push(`/technology/${result.technologyId}/edit/${result.id}`);
+          router.push(`/technology/${result.technologyId}/edit/${result.id}?highlight=${encodeURIComponent(query)}`);
           setIsOpen(false);
           setQuery("");
           setSelectedIndex(-1);
@@ -94,8 +113,8 @@ export function SemanticSearchBar() {
 
   return (
     <div className="relative w-full max-w-md" ref={menuRef}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+      <div className="relative group">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-primary)] transition-colors" />
         <input
           type="text"
           placeholder="Search snippets by concept... (BETA)"
@@ -103,48 +122,118 @@ export function SemanticSearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query && setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          className="w-full rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] py-2 pl-10 pr-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
+          className={cn(
+            "w-full rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] py-2 pl-10 pr-20 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] transition-all shadow-sm",
+            showFilters && "rounded-b-none border-b-transparent"
+          )}
         />
-        {isSearching && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[var(--text-muted)]" />
-        )}
+        
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {isSearching && (
+            <Loader2 className="h-4 w-4 animate-spin text-[var(--text-muted)] mr-1" />
+            )}
+            
+            <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={cn(
+                    "p-1 rounded-md hover:bg-[var(--bg-tertiary)] transition-colors",
+                    (showFilters || selectedTechId) ? "text-[var(--accent-primary)] bg-[var(--accent-primary)]/10" : "text-[var(--text-muted)]"
+                )}
+                title="Filter by Technology"
+            >
+                <Filter className="h-4 w-4" />
+                {selectedTechId && <span className="absolute top-0 right-0 w-2 h-2 bg-[var(--accent-primary)] rounded-full border border-[var(--bg-secondary)]" />}
+            </button>
+        </div>
       </div>
 
+      {/* Filter Dropdown */}
+      {showFilters && (
+        <div className="absolute top-full w-full border border-t-0 border-[var(--border-primary)] bg-[var(--bg-secondary)] rounded-b-lg shadow-xl z-[60] p-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
+            <div className="text-xs font-semibold text-[var(--text-muted)] px-2 uppercase tracking-wider">Filter by Technology</div>
+            <div className="flex flex-wrap gap-1.5 max-h-[150px] overflow-y-auto p-1 scrollbar-thin">
+                <button
+                    onClick={() => {
+                        setSelectedTechId(undefined);
+                        setShowFilters(false);
+                        // Trigger search update immediately if query exists
+                        if (query) performSearch(debouncedQuery, undefined);
+                    }}
+                    className={cn(
+                        "px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5",
+                        !selectedTechId 
+                            ? "bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]" 
+                            : "bg-[var(--bg-tertiary)] text-[var(--text-muted)] border-transparent hover:border-[var(--border-primary)] hover:text-[var(--text-primary)]"
+                    )}
+                >
+                    {!selectedTechId && <Check className="w-3 h-3" />}
+                    All
+                </button>
+                
+                {technologies.map(tech => (
+                    <button
+                        key={tech.id}
+                        onClick={() => {
+                            const newId = selectedTechId === tech.id ? undefined : tech.id;
+                            setSelectedTechId(newId);
+                            setShowFilters(false);
+                            if (query) performSearch(debouncedQuery, newId);
+                        }}
+                        className={cn(
+                            "px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5",
+                            selectedTechId === tech.id 
+                                ? "bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]" 
+                                : "bg-[var(--bg-tertiary)] text-[var(--text-muted)] border-transparent hover:border-[var(--border-primary)] hover:text-[var(--text-primary)]"
+                        )}
+                    >
+                        {selectedTechId === tech.id && <Check className="w-3 h-3" />}
+                        {tech.icon && <span className="mr-0.5">{tech.icon}</span>}
+                        {tech.name}
+                    </button>
+                ))}
+            </div>
+        </div>
+      )}
+
       {/* Results Dropdown */}
-      {isOpen && results.length > 0 && (
+      {isOpen && results.length > 0 && !showFilters && (
         <div className="absolute top-full mt-2 w-full rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] shadow-xl z-50">
           <div className="p-2 space-y-1 max-h-[60vh] overflow-y-auto">
             {results.map((result, index) => (
               <Link
                 key={result.id}
-                href={`/technology/${result.technologyId}/edit/${result.id}`}
+                href={`/technology/${result.technologyId}/edit/${result.id}?highlight=${encodeURIComponent(query)}`}
                 onClick={() => {
                   setIsOpen(false);
                   setQuery("");
                 }}
-                className={`block rounded-md p-3 transition-colors ${
-                  index === selectedIndex ? "bg-[var(--bg-tertiary)] border border-[var(--accent-primary)]/30" : "hover:bg-[var(--bg-tertiary)]"
-                }`}
+                className={cn(
+                  "block rounded-md p-3 transition-colors group",
+                  index === selectedIndex ? "bg-[var(--bg-tertiary)] border border-[var(--accent-primary)]/30" : "hover:bg-[var(--bg-tertiary)] border border-transparent"
+                )}
                 onMouseEnter={() => setSelectedIndex(index)}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--bg-tertiary)] text-xs">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--bg-tertiary)] text-xs border border-[var(--border-primary)] group-hover:border-[var(--accent-primary)]/30 transition-colors">
                     {result.technologyIcon || result.technologyName[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-[var(--text-primary)] truncate">
+                    <div className="font-medium text-sm text-[var(--text-primary)] truncate group-hover:text-[var(--accent-primary)] transition-colors">
                       {result.title}
                     </div>
-                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                      {result.technologyName}
+                    <div className="text-xs text-[var(--text-muted)] mt-0.5 flex items-center gap-2">
+                      <span>{result.technologyName}</span>
                       {result.similarity && (
-                        <span className="ml-2 text-[var(--accent-primary)]">
+                        <span className={cn(
+                            "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                            result.similarity > 0.6 ? "bg-green-500/10 text-green-500" : "bg-yellow-500/10 text-yellow-500"
+                        )}>
                           {Math.round(result.similarity * 100)}% match
                         </span>
                       )}
                     </div>
                   </div>
-                  <FileText className="h-4 w-4 text-[var(--text-muted)] shrink-0" />
+                  <FileText className="h-4 w-4 text-[var(--text-muted)] shrink-0 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </div>
               </Link>
             ))}
@@ -158,7 +247,7 @@ export function SemanticSearchBar() {
       )}
 
       {/* No results */}
-      {isOpen && !isSearching && query && results.length === 0 && (
+      {isOpen && !isSearching && query && results.length === 0 && !showFilters && (
         <div className="absolute top-full mt-2 w-full rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] shadow-xl z-50 p-4 text-center">
           <p className="text-sm text-[var(--text-muted)]">No snippets found</p>
         </div>

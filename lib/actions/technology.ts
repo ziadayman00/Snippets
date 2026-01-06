@@ -92,9 +92,36 @@ export async function deleteTechnology(id: string) {
       // .where(and(eq(technologies.id, id), eq(technologies.userId, user.id)))
     
     revalidatePath("/dashboard");
+// ... (deleteTechnology function)
     return { success: true };
   } catch (error) {
     console.error("Failed to delete technology:", error);
     return { error: "Failed to delete technology" };
+  }
+}
+
+export async function getTechnologies() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  try {
+    const results = await db
+      .select({
+        id: technologies.id,
+        name: technologies.name,
+        icon: technologies.icon,
+      })
+      .from(technologies)
+      .where(eq(technologies.userId, user.id))
+      .orderBy(technologies.name);
+      
+    return results;
+  } catch (error) {
+    console.error("Failed to get technologies:", error);
+    return [];
   }
 }

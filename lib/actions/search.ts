@@ -22,7 +22,8 @@ interface SearchResult {
  */
 export async function semanticSearch(
   query: string,
-  limit: number = 10
+  limit: number = 10,
+  technologyId?: string
 ): Promise<SearchResult[]> {
   const supabase = await createClient();
   const {
@@ -61,7 +62,8 @@ export async function semanticSearch(
     const embeddingVector = `[${queryEmbedding.join(',')}]`;
 
     // Hybrid search: Vector similarity + keyword matching
-    // Using cosine similarity via pgvector's <=> operator
+    // Using simple linear combination:
+    // Final Score = (Vector Similarity * 0.7) + (Title Match * 0.3)
     const results = await db
       .select({
         id: entries.id,
@@ -71,6 +73,11 @@ export async function semanticSearch(
         technologyName: technologies.name,
         technologyIcon: technologies.icon,
         similarity: sql<number>`1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector)`,
+        // Calculate hybrid score directly in SQL
+        score: sql<number>`
+          (1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector)) * 0.7 + 
+          (CASE WHEN ${entries.title} ILIKE ${`%${query}%`} THEN 0.3 ELSE 0 END)
+        `,
       })
       .from(entries)
       .innerJoin(technologies, eq(entries.technologyId, technologies.id))
@@ -78,14 +85,19 @@ export async function semanticSearch(
       .where(
         and(
           eq(entries.userId, user.id),
-          // Boost results that match keywords OR have good semantic similarity
+          // Optional Technology Filter
+          technologyId ? eq(entries.technologyId, technologyId) : undefined,
+          // Flexible match: High similarity OR Keyword match
           or(
             ilike(entries.title, `%${query}%`),
-            sql`1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector) > 0.5`
+            sql`1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector) > 0.3` // Lowered threshold for hybrid
           )
         )
       )
-      .orderBy(desc(sql`1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector)`))
+      .orderBy(desc(sql`
+        (1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector)) * 0.7 + 
+        (CASE WHEN ${entries.title} ILIKE ${`%${query}%`} THEN 0.3 ELSE 0 END)
+      `))
       .limit(limit);
 
     return results;

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb, integer, vector } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, jsonb, integer, vector, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Technologies - Categories for snippets
@@ -10,7 +10,9 @@ export const technologies = pgTable("technologies", {
   icon: text("icon"), // Can store icon name or SVG path
   userId: uuid("user_id").notNull(), // Managed by Supabase Auth
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("technologies_user_id_idx").on(table.userId),
+}));
 
 // Entries - The actual snippets
 export const entries = pgTable("entries", {
@@ -25,7 +27,12 @@ export const entries = pgTable("entries", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastViewedAt: timestamp("last_viewed_at"),
-});
+}, (table) => ({
+  userIdIdx: index("entries_user_id_idx").on(table.userId),
+  createdAtIdx: index("entries_created_at_idx").on(table.createdAt),
+  technologyIdIdx: index("entries_technology_id_idx").on(table.technologyId),
+  updatedAtIdx: index("entries_updated_at_idx").on(table.updatedAt),
+}));
 
 export const snippetLinks = pgTable("snippet_links", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -36,7 +43,10 @@ export const snippetLinks = pgTable("snippet_links", {
     .notNull()
     .references(() => entries.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  sourceIdIdx: index("snippet_links_source_id_idx").on(table.sourceId),
+  targetIdIdx: index("snippet_links_target_id_idx").on(table.targetId),
+}));
 
 // Embeddings - Vector representations for semantic search
 export const snippetEmbeddings = pgTable("snippet_embeddings", {
@@ -88,4 +98,7 @@ export const aiRequests = pgTable("ai_requests", {
   featureType: text("feature_type").notNull(), // 'explain' | 'refine'
   tokensUsed: integer("tokens_used").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("ai_requests_user_id_idx").on(table.userId),
+  createdAtIdx: index("ai_requests_created_at_idx").on(table.createdAt),
+}));
