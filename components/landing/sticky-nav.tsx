@@ -70,10 +70,22 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
               About
             </Link>
             <Link
+              href="/pricing"
+              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link
               href="/docs"
               className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             >
               Docs
+            </Link>
+            <Link
+              href="/changelog"
+              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              Changelog
             </Link>
             <a
               href="https://github.com"
@@ -128,11 +140,25 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
                     About
                 </Link>
                 <Link
+                    href="/pricing"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
+                    >
+                    Pricing
+                </Link>
+                <Link
                     href="/docs"
                     onClick={(e) => e.stopPropagation()}
                     className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
                     >
                     Docs
+                </Link>
+                <Link
+                    href="/changelog"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
+                    >
+                    Changelog
                 </Link>
                 <a
                     href="https://github.com"

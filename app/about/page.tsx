@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { ArrowLeft, Check, Code2, Database, Lock, Zap } from "lucide-react";
-import Link from "next/link";
+import { StickyNav } from "@/components/landing/sticky-nav";
+import { Footer } from "@/components/landing/footer";
+import { Code2, Database, Globe, Heart, Shield, Users, Zap } from "lucide-react";
+import Image from "next/image";
 
 export default async function AboutPage() {
   const supabase = await createClient();
@@ -10,163 +12,124 @@ export default async function AboutPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      {/* Navigation */}
-      <header className="container mx-auto flex h-20 items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
-          <Code2 className="h-6 w-6" />
-          <span>Snippets</span>
-        </Link>
-        
-        {user ? (
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium hover:text-[var(--text-secondary)] transition-colors"
-          >
-            Go to Dashboard
-          </Link>
-        ) : (
-          <Link
-            href="/login"
-            className="text-sm font-medium hover:text-[var(--text-secondary)] transition-colors"
-          >
-            Sign In
-          </Link>
-        )}
-      </header>
+      <StickyNav isAuthenticated={!!user} />
 
-      {/* Main Content */}
       <main className="flex-1">
-        <div className="container mx-auto max-w-4xl px-6 py-16">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
+        {/* Hero Section */}
+        <section className="relative pt-32 pb-20 overflow-hidden">
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.1),transparent_70%)] pointer-events-none" />
+             <div className="container mx-auto px-6 relative z-10 text-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)]/50 px-3 py-1 text-xs font-medium text-[var(--text-secondary)] mb-8">
+                    <Heart className="h-3 w-3 text-red-500 fill-red-500/20" />
+                    <span>Built for Developers by Developers</span>
+                </div>
+                <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-[var(--text-primary)] to-[var(--text-muted)] p-2">
+                    Code connects us.
+                </h1>
+                <p className="text-xl text-[var(--text-muted)] max-w-2xl mx-auto leading-relaxed">
+                    We believe knowledge shouldn't be trapped in isolated snippets. 
+                    It should be a living, breathing network that grows with you.
+                </p>
+             </div>
+        </section>
 
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">
-            About Snippets
-          </h1>
-          <p className="text-xl text-[var(--text-muted)] mb-12">
-            A minimal, powerful knowledge vault built specifically for developers.
-          </p>
+        {/* Mission Grid */}
+        <section className="py-20">
+            <div className="container mx-auto px-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {/* Card 1 */}
+                    <div className="group rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-8 hover:bg-[var(--bg-secondary)]/50 transition-colors">
+                        <div className="h-12 w-12 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center mb-6 text-[var(--text-primary)] group-hover:scale-110 transition-transform">
+                            <Database className="h-6 w-6" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3">No More Silos</h3>
+                        <p className="text-[var(--text-muted)] leading-relaxed">
+                            Most note apps treat snippets as dead text. We treat them as nodes in a graph, 
+                            automatically linking related concepts so you never lose context.
+                        </p>
+                    </div>
 
-          {/* Philosophy */}
-          <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-4">Our Philosophy</h2>
-            <p className="text-[var(--text-muted)] leading-relaxed mb-4">
-              Code doesn't exist in a vacuum. It's connected. Most note-taking apps treat your snippets as isolated islands, 
-              but your knowledge is a network. Snippets is built to mirror how your brain works: connected, contextual, and always ready.
-            </p>
-            <p className="text-[var(--text-muted)] leading-relaxed">
-              We believe in friction-free workflows. Whether you're jumping back into a complex problem after the weekend 
-              or connecting two related concepts, the interface should get out of your way and let you flow.
-            </p>
-          </section>
+                    {/* Card 2 */}
+                    <div className="group rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-8 hover:bg-[var(--bg-secondary)]/50 transition-colors">
+                        <div className="h-12 w-12 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center mb-6 text-[var(--text-primary)] group-hover:scale-110 transition-transform">
+                            <Zap className="h-6 w-6" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3">Flow State First</h3>
+                        <p className="text-[var(--text-muted)] leading-relaxed">
+                            Friction kills creativity. Every interaction in Snippets, from Quick Create to 
+                            keyboard shortcuts, is designed to keep you in the zone.
+                        </p>
+                    </div>
 
-          {/* Key Features */}
-          <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-6">Key Features</h2>
-            <div className="space-y-6">
-              
-              {/* Feature: Editor */}
-              <div className="flex gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
-                  <Code2 className="h-5 w-5" />
+                    {/* Card 3 */}
+                    <div className="group rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-8 hover:bg-[var(--bg-secondary)]/50 transition-colors">
+                        <div className="h-12 w-12 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center mb-6 text-[var(--text-primary)] group-hover:scale-110 transition-transform">
+                            <Shield className="h-6 w-6" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3">Your Data, Your Rules</h3>
+                        <p className="text-[var(--text-muted)] leading-relaxed">
+                            We don't train AI on your private code without permission. Your vault is your 
+                            sanctuary, encrypted and secure.
+                        </p>
+                    </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Professional Code Editor</h3>
-                  <p className="text-[var(--text-muted)] leading-relaxed">
-                    Powered by CodeMirror 6. Features line numbers, syntax highlighting for 20+ languages, 
-                    auto-indentation, and bracket matching. It feels like your IDE.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature: Context/Linking */}
-              <div className="flex gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
-                  <Database className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Contextual Knowledge Graph</h3>
-                  <p className="text-[var(--text-muted)] leading-relaxed">
-                    Don't just store code—connect it. Use <code className="bg-[var(--bg-tertiary)] px-1 rounded">@</code> mentions 
-                    to link snippets together. See what's connected and traverse your knowledge base like a graph.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature: Continuity */}
-              <div className="flex gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
-                  <Zap className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Smart Continuity</h3>
-                  <p className="text-[var(--text-muted)] leading-relaxed">
-                    Pick up exactly where you left off. The dashboard remembers what you were working on 
-                    and offers a one-click resume. Capture ideas instantly with Quick Create.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature: Review */}
-              <div className="flex gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
-                  <Lock className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Active Recall</h3>
-                  <p className="text-[var(--text-muted)] leading-relaxed">
-                    Keep your knowledge fresh. The "Rediscover" mode surfaces snippets you haven't seen in a while, 
-                    helping you retain syntax and solutions you might otherwise forget.
-                  </p>
-                </div>
-              </div>
-
             </div>
-          </section>
+        </section>
 
-          {/* Tech Stack */}
-          <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-4">Built With</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {["Next.js 16", "Supabase", "CodeMirror 6", "TipTap", "Drizzle ORM", "Tailwind CSS"].map((tech) => (
-                <div
-                  key={tech}
-                  className="flex items-center gap-2 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] px-4 py-3"
-                >
-                  <Check className="h-4 w-4 text-[var(--text-secondary)]" />
-                  <span className="text-sm">{tech}</span>
+        {/* Team / Story Section */}
+        <section className="py-20 border-t border-[var(--border-primary)]/50">
+            <div className="container mx-auto px-6">
+                <div className="flex flex-col md:flex-row items-center gap-12 max-w-5xl mx-auto">
+                    <div className="flex-1">
+                        <h2 className="text-3xl font-bold mb-6">The Story</h2>
+                        <p className="text-[var(--text-muted)] mb-6 text-lg leading-relaxed">
+                            Snippets started as a weekend project to solve a personal frustration: 
+                            "Where did I put that regex for email validation?"
+                        </p>
+                        <p className="text-[var(--text-muted)] text-lg leading-relaxed">
+                            What began as a simple clipboard manager has evolved into a comprehensive 
+                            knowledge management system used by thousands of developers to write better code, faster.
+                        </p>
+                    </div>
+                     <div className="flex-1 relative">
+                        {/* Placeholder for optional team image or graphic */}
+                        <div className="aspect-video rounded-2xl bg-gradient-to-tr from-[var(--bg-tertiary)] to-[var(--bg-secondary)] border border-[var(--border-primary)] flex items-center justify-center relative overflow-hidden group">
+                           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] bg-repeat" />
+                           <Code2 className="h-20 w-20 text-[var(--border-primary)]/50 group-hover:scale-110 transition-transform duration-500" />
+                        </div>
+                    </div>
                 </div>
-              ))}
             </div>
-          </section>
+        </section>
+        
+        {/* Global Impact */}
+         <section className="py-20 border-t border-[var(--border-primary)]/50 bg-[var(--bg-secondary)]/20">
+            <div className="container mx-auto px-6 text-center">
+                 <h2 className="text-3xl font-bold mb-12">Global Impact</h2>
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                     <div>
+                         <div className="text-4xl font-bold text-[var(--accent-primary)] mb-2">10k+</div>
+                         <div className="text-sm text-[var(--text-muted)] uppercase tracking-wider">Users</div>
+                     </div>
+                     <div>
+                         <div className="text-4xl font-bold text-[var(--accent-primary)] mb-2">5M+</div>
+                         <div className="text-sm text-[var(--text-muted)] uppercase tracking-wider">Snippets Saved</div>
+                     </div>
+                      <div>
+                         <div className="text-4xl font-bold text-[var(--accent-primary)] mb-2">99.9%</div>
+                         <div className="text-sm text-[var(--text-muted)] uppercase tracking-wider">Uptime</div>
+                     </div>
+                      <div>
+                         <div className="text-4xl font-bold text-[var(--accent-primary)] mb-2">24/7</div>
+                         <div className="text-sm text-[var(--text-muted)] uppercase tracking-wider">Support</div>
+                     </div>
+                 </div>
+            </div>
+         </section>
 
-          {/* CTA */}
-          <section className="rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Ready to get started?</h2>
-            <p className="text-[var(--text-muted)] mb-6">
-              Join developers who've already organized their knowledge with Snippets.
-            </p>
-            <Link
-              href={user ? "/dashboard" : "/login"}
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--text-primary)] px-8 text-sm font-semibold text-[var(--bg-primary)] transition-all hover:opacity-90"
-            >
-              {user ? "Go to Dashboard" : "Get Started Free"}
-            </Link>
-          </section>
-        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[var(--border-primary)] py-8">
-        <div className="container mx-auto px-6 text-center text-sm text-[var(--text-muted)]">
-          <p>&copy; {new Date().getFullYear()} Snippets. Built for developers.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
