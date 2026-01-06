@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, Plus, Code2, BarChart3 } from "lucide-react";
+import { LogOut, Plus, BarChart3 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -22,9 +23,12 @@ export function Header({ email }: { email?: string }) {
     <>
       <header className="sticky top-0 z-50 w-full border-b border-[var(--border-primary)] bg-[var(--bg-primary)]/80 backdrop-blur-sm">
         <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity shrink-0">
-            <Code2 className="h-6 w-6" />
-            <span className="hidden sm:inline">Snippets</span>
+          <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
+            <img 
+              src="/logo.svg" 
+              alt="Snippets" 
+              className="h-6 md:h-8 w-auto"
+            />
           </Link>
 
           {/* Semantic Search Bar */}

@@ -1,7 +1,7 @@
 "use client";
 
-import { Code2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 
 interface StickyNavProps {
@@ -55,10 +55,13 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
           <Link
             href="/"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            <Code2 className="h-6 w-6" />
-            <span>Snippets</span>
+            <img 
+              src="/logo.svg" 
+              alt="Snippets" 
+              className="h-6 md:h-8 w-auto"
+            />
           </Link>
 
           {/* Navigation Links - Desktop */}

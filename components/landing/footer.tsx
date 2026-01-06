@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Code2 } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -8,9 +8,12 @@ export function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 font-bold text-lg tracking-tight mb-3">
-              <Code2 className="h-5 w-5" />
-              <span>Snippets</span>
+            <div className="flex items-center gap-2 mb-3">
+              <img 
+                src="/logo.svg" 
+                alt="Snippets" 
+                className="h-8 w-auto"
+              />
             </div>
             <p className="text-sm text-[var(--text-muted)]">
               Your programming knowledge vault.

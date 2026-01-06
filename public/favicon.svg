@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg viewBox="0 0 1385 299" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-    <g transform="matrix(1,0,0,1,-268,-811)">
-        <g id="Group-1" serif:id="Group 1">
-            <g id="ChatGPT-Image-Jan-6--2026--05_51_11-PM" serif:id="ChatGPT Image Jan 6, 2026, 05_51_11 PM" transform="matrix(0.373715,0,0,0.373715,402.163604,960.112195)">
+<svg width="100%" height="100%" viewBox="0 0 1275 1275" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-323,-323)">
+        <g>
+            <circle id="Ellipse-1" serif:id="Ellipse 1" cx="960.5" cy="960.5" r="637.5" style="fill:rgb(29,29,29);"/>
+            <g id="ChatGPT-Image-Jan-6--2026--05_51_11-PM" serif:id="ChatGPT Image Jan 6, 2026, 05_51_11 PM" transform="matrix(0.948468,0,0,0.948622,960.5,960.5)">
                 <g transform="matrix(1,0,0,1,-359,-399)">
                     <use id="ChatGPT-Image-Jan-6--2026--05_51_11-PM1" serif:id="ChatGPT Image Jan 6, 2026, 05_51_11 PM" xlink:href="#_Image1" x="0" y="0" width="718px" height="798px"/>
                 </g>
-            </g>
-            <g id="Snippets" transform="matrix(1.422444,0,0,1.422444,610.489805,1022.560007)">
-                <g transform="matrix(150,0,0,150,746.25,0)">
-                </g>
-                <text x="0px" y="0px" style="font-family:'JetBrainsMono-Thin', 'JetBrains Mono', monospace;font-weight:100;font-size:150px;fill:rgb(232,230,224);">S<tspan x="93.75px 187.5px 281.25px 375px 468.75px 562.5px 656.25px " y="0px 0px 0px 0px 0px 0px 0px ">nippets</tspan></text>
             </g>
         </g>
     </g>
