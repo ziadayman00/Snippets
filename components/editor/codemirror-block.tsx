@@ -1,8 +1,6 @@
-"use client";
-
 import { NodeViewWrapper, NodeViewProps } from "@tiptap/react";
 import { Check, ChevronDown, Copy } from "lucide-react";
-import { useEffect, useRef, useState, memo } from "react";
+import { useEffect, useRef, useState, memo, useLayoutEffect } from "react";
 import { EditorView } from "@codemirror/view";
 import { EditorState, Compartment } from "@codemirror/state";
 import { basicSetup } from "codemirror";
@@ -11,7 +9,21 @@ import { python } from "@codemirror/lang-python";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
 import { json } from "@codemirror/lang-json";
+import { java } from "@codemirror/lang-java";    
+import { cpp } from "@codemirror/lang-cpp";      
+import { go } from "@codemirror/lang-go";        
+import { rust } from "@codemirror/lang-rust";    
+import { php } from "@codemirror/lang-php";      
+import { sql } from "@codemirror/lang-sql";      
+import { markdown } from "@codemirror/lang-markdown"; 
+import { xml } from "@codemirror/lang-xml";      
+import { yaml } from "@codemirror/lang-yaml";    
+import { wast } from "@codemirror/lang-wast";    
 import { oneDark } from "@codemirror/theme-one-dark";
+import { common, createLowlight } from "lowlight";
+
+// Initialize lowlight for auto-detection
+const lowlight = createLowlight(common);
 
 // Language map
 const languageMap: Record<string, any> = {
@@ -23,6 +35,20 @@ const languageMap: Record<string, any> = {
   css: css(),
   html: html(),
   json: json(),
+  java: java(),
+  cpp: cpp(),
+  c: cpp(), // C++ package handles C usually
+  csharp: cpp(), // Close enough for basic highlight or valid fallback
+  go: go(),
+  rust: rust(),
+  php: php(),
+  sql: sql(),
+  markdown: markdown(),
+  xml: xml(),
+  yaml: yaml(),
+  wasm: wast(),
+  bash: oneDark, // Fallback for shell scripts (no official shell pkg installed yet, using theme default)
+  shell: oneDark,
 };
 
 const CodeMirrorBlockComponent = (props: NodeViewProps) => {
@@ -34,12 +60,43 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
   const languageCompartment = useRef(new Compartment());
   const isInitializedRef = useRef(false);
 
+  // Auto-detect language if needed
+  const detectLanguage = (code: string) => {
+    try {
+       // Only run auto-detect if the code is long enough to be meaningful
+       if (!code || code.trim().length < 10) return "javascript";
+
+       const detected = lowlight.highlightAuto(code);
+       const lang = detected.data?.language;
+       
+       // Map lowlight names to our supported languages
+       if (lang && languageMap[lang]) return lang;
+       if (lang === 'ts') return 'typescript';
+       if (lang === 'js') return 'javascript';
+       if (lang === 'py') return 'python';
+       if (lang === 'yml') return 'yaml';
+       if (lang === 'md') return 'markdown';
+       
+       return "javascript"; // Fallback
+    } catch (e) {
+        return "javascript";
+    }
+  };
+
+  // Determine effective language: explicit prop OR auto-detected
+  const effectiveLanguage = node.attrs.language === 'plaintext' || !node.attrs.language 
+      ? detectLanguage(node.textContent) 
+      : node.attrs.language;
+
   const defaultLanguage = node.attrs.language || "javascript";
   const languages = Object.keys(languageMap);
 
   // Mount effect - create view ONCE
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!editorRef.current || isInitializedRef.current) return;
+
+    // Use effectiveLanguage for initial setup
+    const initialLang = effectiveLanguage || "javascript";
 
     const startState = EditorState.create({
       doc: node.textContent,
@@ -47,7 +104,7 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
         basicSetup,
         oneDark,
         languageCompartment.current.of(
-          languageMap[defaultLanguage] || []
+          languageMap[initialLang] || languageMap['javascript']
         ),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -57,7 +114,6 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
             if (typeof props.getPos === 'function') {
                const pos = props.getPos();
                
-               // Ensure pos is a valid number before using it
                if (typeof pos !== 'number') return;
                
                // We must fetch the fresh node from the state to get correct nodeSize
@@ -70,6 +126,11 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
                    // pos + 1 is the start of content
                    // pos + currentNode.nodeSize - 1 is the end of content
                    tr.replaceWith(pos + 1, pos + currentNode.nodeSize - 1, props.editor.schema.text(content));
+                   
+                   // Update language attribute if it was auto-detected, 
+                   // so it persists. Note: This might be too aggressive if user wants plaintext.
+                   // For now, we only update content.
+                   
                    props.editor.view.dispatch(tr);
                }
             }
@@ -120,14 +181,15 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
 
   // Update language when changed
   useEffect(() => {
-    if (viewRef.current && defaultLanguage) {
+    if (viewRef.current) {
+      const lang = effectiveLanguage || "javascript";
       viewRef.current.dispatch({
         effects: languageCompartment.current.reconfigure(
-          languageMap[defaultLanguage] || []
+          languageMap[lang] || languageMap['javascript']
         ),
       });
     }
-  }, [defaultLanguage]);
+  }, [effectiveLanguage]);
 
   const handleCopy = () => {
     if (viewRef.current) {
@@ -137,12 +199,14 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+  
+  // languages variable removed from here because it's already defined above.
 
   return (
-    <NodeViewWrapper dir="ltr" className="code-block my-4 overflow-hidden rounded-lg border border-[var(--border-primary)] bg-[#1e1e1e] shadow-sm">
+    <NodeViewWrapper dir="ltr" className="code-block my-4 rounded-lg border border-[var(--border-primary)] bg-[#1e1e1e] shadow-sm">
       {/* Header */}
       <div
-        className="flex items-center justify-between border-b border-[#2a2a2a] bg-[#252526] px-4 py-2 select-none"
+        className="flex items-center justify-between border-b border-[#2a2a2a] bg-[#252526] px-4 py-2 select-none rounded-t-lg"
         contentEditable={false}
       >
         {/* Language Selector */}
@@ -207,7 +271,7 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
       </div>
 
       {/* CodeMirror Editor */}
-      <div ref={editorRef} className="codemirror-wrapper" />
+      <div ref={editorRef} className="codemirror-wrapper rounded-b-lg overflow-hidden" />
     </NodeViewWrapper>
   );
 };

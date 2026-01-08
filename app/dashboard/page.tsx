@@ -96,6 +96,12 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
+              href="/collections"
+              className="hidden sm:flex items-center gap-2 rounded-md border border-[var(--border-primary)] bg-[var(--bg-secondary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:border-[var(--accent-primary)]"
+            >
+              <span>Collections</span>
+            </Link>
+            <Link
               href="/ask"
               className="flex items-center gap-2 rounded-md border border-[var(--border-primary)] bg-[var(--bg-secondary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:border-[var(--accent-primary)]"
             >

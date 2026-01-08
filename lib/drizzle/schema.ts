@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb, integer, vector, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, jsonb, integer, vector, index, real } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Technologies - Categories for snippets
@@ -27,11 +27,18 @@ export const entries = pgTable("entries", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastViewedAt: timestamp("last_viewed_at"),
+  
+  // SRS Fields
+  easinessFactor: real("easiness_factor").default(2.5).notNull(),
+  repetitions: integer("repetitions").default(0).notNull(),
+  interval: integer("interval").default(0).notNull(), // in days
+  nextReviewDate: timestamp("next_review_date"), // null means new/not started
 }, (table) => ({
   userIdIdx: index("entries_user_id_idx").on(table.userId),
   createdAtIdx: index("entries_created_at_idx").on(table.createdAt),
   technologyIdIdx: index("entries_technology_id_idx").on(table.technologyId),
   updatedAtIdx: index("entries_updated_at_idx").on(table.updatedAt),
+  nextReviewDateIdx: index("entries_next_review_date_idx").on(table.nextReviewDate),
 }));
 
 export const snippetLinks = pgTable("snippet_links", {
@@ -99,6 +106,86 @@ export const aiRequests = pgTable("ai_requests", {
   tokensUsed: integer("tokens_used").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
-  userIdIdx: index("ai_requests_user_id_idx").on(table.userId),
   createdAtIdx: index("ai_requests_created_at_idx").on(table.createdAt),
+}));
+
+
+// Tagging System
+export const tags = pgTable("tags", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  userId: uuid("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("tags_user_id_idx").on(table.userId),
+  nameIdx: index("tags_name_idx").on(table.name),
+}));
+
+export const entryTags = pgTable("entry_tags", {
+  entryId: uuid("entry_id")
+    .notNull()
+    .references(() => entries.id, { onDelete: "cascade" }),
+  tagId: uuid("tag_id")
+    .notNull()
+    .references(() => tags.id, { onDelete: "cascade" }),
+}, (table) => ({
+    pk: index("entry_tags_pk").on(table.entryId, table.tagId), // Composite index for lookups
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  entries: many(entryTags),
+}));
+
+export const entryTagsRelations = relations(entryTags, ({ one }) => ({
+  entry: one(entries, {
+    fields: [entryTags.entryId],
+    references: [entries.id],
+  }),
+  tag: one(tags, {
+    fields: [entryTags.tagId],
+    references: [tags.id],
+  }),
+}));
+
+// Collections (Playlists)
+export const collections = pgTable("collections", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("collections_user_id_idx").on(table.userId),
+}));
+
+export const collectionEntries = pgTable("collection_entries", {
+  collectionId: uuid("collection_id").references(() => collections.id, { onDelete: 'cascade' }).notNull(),
+  entryId: uuid("entry_id").references(() => entries.id, { onDelete: 'cascade' }), // Nullable
+  technologyId: uuid("technology_id").references(() => technologies.id, { onDelete: 'cascade' }), // Nullable
+  order: integer("order").notNull(), 
+}, (table) => ({
+  pk: index("collection_entries_pk").on(table.collectionId), // Removed compound PK for simplicity or use unique index on logic
+  collectionIdIdx: index("collection_entries_collection_id_idx").on(table.collectionId),
+}));
+
+// Relations
+export const collectionsRelations = relations(collections, ({ many }) => ({
+  entries: many(collectionEntries),
+}));
+
+export const collectionEntriesRelations = relations(collectionEntries, ({ one }) => ({
+  collection: one(collections, {
+    fields: [collectionEntries.collectionId],
+    references: [collections.id],
+  }),
+  entry: one(entries, {
+    fields: [collectionEntries.entryId],
+    references: [entries.id],
+  }),
+  technology: one(technologies, {
+    fields: [collectionEntries.technologyId],
+    references: [technologies.id],
+  }),
 }));

@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 
 import { syncSnippetLinks } from "@/lib/actions/links";
 import { upsertEmbedding } from "@/lib/actions/embeddings";
+import { updateEntryTags } from "@/lib/actions/tags";
 
 export async function createEntry(formData: FormData) {
   const supabase = await createClient();
@@ -58,6 +59,17 @@ export async function createEntry(formData: FormData) {
     }).returning({ id: entries.id });
 
     if (inserted) {
+        // Handle tags
+        const tagsString = formData.get("tags") as string;
+        if (tagsString) {
+            try {
+                const tagNames = JSON.parse(tagsString) as string[];
+                await updateEntryTags(inserted.id, tagNames);
+            } catch (e) {
+                console.error("Failed to parse tags", e);
+            }
+        }
+
         await syncSnippetLinks(inserted.id, contentJson);
         // Generate AI embedding for semantic search
         await upsertEmbedding(inserted.id, title, contentJson);
@@ -66,25 +78,13 @@ export async function createEntry(formData: FormData) {
     revalidatePath(`/technology/${technologyId}`);
     revalidatePath("/dashboard");
     
-    // If successfully inserted, we can redirect or return success. 
-    // Since QuickCreate uses this, we might want to redirect.
-    // However, if normal create uses this, checks if it expects a redirect.
-    // But normal create is usually on a separate page or modal.
-    // Let's redirect if inserted.
-    if (inserted) {
-        redirect(`/technology/${technologyId}/edit/${inserted.id}`);
-    }
+    // Return the entry ID so the caller can handle navigation
+    return { success: true, entryId: inserted?.id };
 
   } catch (error) {
-    // Redirect throws an error (NEXT_REDIRECT), so we must catch it and re-throw if it is a redirect error.
-    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
-        throw error;
-    }
     console.error("Failed to create entry:", error);
     throw new Error("Failed to create entry");
   }
-  
-  return { success: true };
 }
 
 export async function deleteEntry(id: string, technologyId: string) {
@@ -152,6 +152,17 @@ export async function updateEntry(formData: FormData) {
         })
         .where(eq(entries.id, id));
     
+    // Handle tags
+    const tagsString = formData.get("tags") as string;
+    if (tagsString) {
+        try {
+            const tagNames = JSON.parse(tagsString) as string[];
+            await updateEntryTags(id, tagNames);
+        } catch (e) {
+            console.error("Failed to parse tags", e);
+        }
+    }
+
     await syncSnippetLinks(id, contentJson);
     // Update AI embedding for semantic search
     await upsertEmbedding(id, title, contentJson);

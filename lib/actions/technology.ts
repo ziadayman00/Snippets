@@ -3,7 +3,7 @@
 import { db } from "@/lib/drizzle/db";
 import { technologies } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
-import { eq } from "drizzle-orm";
+import { eq, and, ilike } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createTechnology(formData: FormData) {
@@ -124,4 +124,23 @@ export async function getTechnologies() {
     console.error("Failed to get technologies:", error);
     return [];
   }
+}
+
+export async function searchTechnologies(query: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  return db
+    .select({
+      id: technologies.id,
+      name: technologies.name,
+    })
+    .from(technologies)
+    .where(and(
+      eq(technologies.userId, user.id),
+      ilike(technologies.name, `%${query}%`)
+    ))
+    .limit(10);
 }

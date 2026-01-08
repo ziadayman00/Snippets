@@ -19,6 +19,10 @@ import { CodeMirrorBlock } from "./codemirror-block";
 import { Marker, Underline, FontSize } from "./extensions"; 
 import Heading from '@tiptap/extension-heading';
 import TextAlign from '@tiptap/extension-text-align';
+import { Table } from '@tiptap/extension-table';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TableRow } from '@tiptap/extension-table-row';
 
 // Register languages for syntax highlighting
 const lowlight = createLowlight(common);
@@ -56,6 +60,7 @@ import { ReactRenderer } from '@tiptap/react';
 import tippy from 'tippy.js';
 import { MentionList } from './mention-list';
 import { searchSnippets } from '@/lib/actions/links';
+import { SlashCommand, getSuggestionItems, renderSuggestion } from './extensions/slash-command';
 
 // Highlight colors palette
 const HIGHLIGHT_COLORS = [
@@ -188,6 +193,18 @@ export function TiptapEditor({
           },
         },
       }),
+      SlashCommand.configure({
+        suggestion: {
+            items: getSuggestionItems,
+            render: renderSuggestion,
+        }
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: content ? JSON.parse(content) : "", 
     editable,
@@ -470,8 +487,11 @@ export function TiptapEditor({
                     icon={<Quote className="h-4 w-4" />}
                     title="Blockquote"
                 />
-                 <ToolbarButton
-                    onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleCodeBlock().run(); }}
+                <ToolbarButton
+                    onClick={(e) => { 
+                        e.preventDefault(); 
+                        editor.chain().toggleCodeBlock().run(); 
+                    }}
                     isActive={editor.isActive("codeBlock")}
                     icon={<span className="font-mono text-xs font-bold">{"{}"}</span>}
                     title="Code Block"

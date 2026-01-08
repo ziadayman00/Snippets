@@ -11,11 +11,13 @@ type EntryCardProps = {
     id: string;
     title: string;
     updatedAt: Date;
+    technologyName?: string; // Optional for when we want to display it
   };
   technologyId: string;
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
+  showTechnology?: boolean;
 };
 
 export function EntryCard({ 
@@ -23,7 +25,8 @@ export function EntryCard({
   technologyId, 
   selectable = false, 
   selected = false, 
-  onToggleSelect 
+  onToggleSelect,
+  showTechnology = false
 }: EntryCardProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -80,9 +83,19 @@ export function EntryCard({
           <h3 className="font-medium text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">
             {entry.title}
           </h3>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Last updated {new Date(entry.updatedAt).toLocaleDateString()}
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+             <p className="text-xs text-[var(--text-muted)]">
+                {new Date(entry.updatedAt).toLocaleDateString()}
+             </p>
+             {showTechnology && entry.technologyName && (
+                 <>
+                    <span className="text-[var(--text-muted)]">•</span>
+                    <span className="text-xs font-medium text-[var(--accent-primary)]/80">
+                        {entry.technologyName}
+                    </span>
+                 </>
+             )}
+          </div>
         </div>
 
         {/* Options Menu - Hide in selection mode */}

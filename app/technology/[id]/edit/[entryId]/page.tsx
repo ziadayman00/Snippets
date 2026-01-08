@@ -7,6 +7,8 @@ import { eq } from "drizzle-orm";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getEntryTags } from "@/lib/actions/tags";
+import { TagInput } from "@/components/tags/tag-input";
 
 export default async function EditEntryPage({
  params,
@@ -53,6 +55,9 @@ export default async function EditEntryPage({
   await db.update(entries)
     .set({ lastViewedAt: new Date() })
     .where(eq(entries.id, entryId));
+
+  const tags = await getEntryTags(entryId);
+  const tagNames = tags.map(t => t.name);
 
   return (
     <div className="flex min-h-screen lg:h-screen flex-col bg-[var(--bg-primary)]">
@@ -101,6 +106,10 @@ export default async function EditEntryPage({
                   autoFocus
                   autoComplete="off"
                 />
+            </div>
+
+            <div className="px-6 lg:px-0">
+                <TagInput initialTags={tagNames} />
             </div>
 
             <EntryEditorWrapper 

@@ -6,12 +6,14 @@ import { ArrowLeft, Loader2, Save } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { TagInput } from "@/components/tags/tag-input";
 
 export default function NewEntryPage() {
   const params = useParams();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,10 +25,15 @@ export default function NewEntryPage() {
     formData.append("title", title);
     formData.append("content", content);
     formData.append("technologyId", params.id as string);
+    formData.append("tags", JSON.stringify(tags));
 
     try {
-      await createEntry(formData);
-      router.push(`/technology/${params.id}`);
+      const result = await createEntry(formData);
+      if (result.success && result.entryId) {
+        router.push(`/technology/${params.id}/edit/${result.entryId}`);
+      } else {
+        router.push(`/technology/${params.id}`);
+      }
       router.refresh(); 
     } catch (error) {
       console.error(error);
@@ -76,6 +83,10 @@ export default function NewEntryPage() {
             autoFocus
             required
           />
+          
+          <div className="shrink-0">
+             <TagInput onChange={setTags} />
+          </div>
 
           <TiptapEditor
             onChange={(json) => setContent(json)}

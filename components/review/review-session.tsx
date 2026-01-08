@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TiptapEditor } from "@/components/editor/tiptap-editor";
 import { ArrowLeft, ArrowRight, Check, Edit2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { submitReview } from "@/lib/actions/review";
 
 type ReviewSnippet = {
     id: string;
@@ -19,6 +20,7 @@ export function ReviewSession({ snippets }: { snippets: ReviewSnippet[] }) {
     const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (snippets.length === 0) {
         return (
@@ -43,11 +45,21 @@ export function ReviewSession({ snippets }: { snippets: ReviewSnippet[] }) {
     const currentSnippet = snippets[currentIndex];
     const isLast = currentIndex === snippets.length - 1;
 
-    const handleNext = () => {
-        if (isLast) {
-            setIsFinished(true);
-        } else {
-            setCurrentIndex((prev) => prev + 1);
+    const handleGrade = async (grade: number) => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            await submitReview(currentSnippet.id, grade);
+            if (isLast) {
+                setIsFinished(true);
+            } else {
+                setCurrentIndex((prev) => prev + 1);
+            }
+        } catch (error) {
+            console.error("Failed to submit review:", error);
+            alert("Failed to save progress. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -115,24 +127,46 @@ export function ReviewSession({ snippets }: { snippets: ReviewSnippet[] }) {
                     />
                 </div>
                 
-                {/* Footer Controls */}
-                <div className="p-4 sm:p-6 border-t border-[var(--border-primary)] bg-[var(--bg-secondary)] flex items-center justify-between gap-4">
+                {/* Footer Controls - SRS Grading */}
+                <div className="p-4 sm:p-6 border-t border-[var(--border-primary)] bg-[var(--bg-secondary)] flex flex-col sm:flex-row items-center justify-between gap-4">
                      <button
                         onClick={() => window.open(`/technology/${currentSnippet.technologyId}/edit/${currentSnippet.id}`, '_blank')}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors rounded-lg hover:bg-[var(--bg-tertiary)]"
-                        title="Edit in new tab"
+                        className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2"
                      >
-                        <Edit2 className="h-4 w-4" />
-                        <span className="hidden sm:inline">Open to Edit</span>
+                        <Edit2 className="h-3 w-3" />
+                        Edit Snippet
                      </button>
 
-                     <button
-                        onClick={handleNext}
-                        className="flex items-center gap-2 px-8 py-3 rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-bold shadow-md transition-all hover:opacity-90 hover:shadow-lg active:scale-95"
-                     >
-                        <span>{isLast ? "Done" : "Next Snippet"}</span>
-                        {isLast ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-                     </button>
+                     <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                            onClick={() => handleGrade(0)}
+                            disabled={isSubmitting}
+                            className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 text-sm font-semibold transition-colors border border-red-500/20"
+                        >
+                            Again
+                        </button>
+                        <button
+                            onClick={() => handleGrade(3)}
+                            disabled={isSubmitting}
+                            className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 text-sm font-semibold transition-colors border border-yellow-500/20"
+                        >
+                            Hard
+                        </button>
+                        <button
+                            onClick={() => handleGrade(4)}
+                            disabled={isSubmitting}
+                            className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-sm font-semibold transition-colors border border-blue-500/20"
+                        >
+                            Good
+                        </button>
+                        <button
+                            onClick={() => handleGrade(5)}
+                            disabled={isSubmitting}
+                            className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500/20 text-sm font-semibold transition-colors border border-green-500/20"
+                        >
+                            Easy
+                        </button>
+                     </div>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import { BookOpen, Code, Database, FileText, Keyboard, Layout, Search, Settings, Share2, Zap } from "lucide-react";
+import { BookOpen, Code, Database, FileText, Keyboard, Layout, Search, Settings, Share2, Zap, Sparkles } from "lucide-react";
 
 export interface DocSection {
   id: string;
@@ -82,6 +82,29 @@ export const DOCS_DATA: DocSection[] = [
               id: "quick-find",
               title: "Quick Find (Cmd+K)",
               content: "Press Cmd+K (or Ctrl+K) anywhere in the app to open the Omni-search bar. Navigate your entire vault without lifting your hands from the keyboard."
+          }
+      ]
+  },
+  {
+      id: "ask-feature",
+      title: "Ask Your Notes",
+      icon: Sparkles,
+      content: "Transform your static notes into an interactive knowledge base. Use natural language to query your snippets and get instant, context-aware answers.",
+      subsections: [
+          {
+              id: "ai-analysis",
+              title: "AI Analysis",
+              content: "Our advanced AI analyzes your question against your entire snippet library to synthesize comprehensive answers, not just keyword matches."
+          },
+          {
+              id: "source-transparency",
+              title: "Source Transparency",
+              content: "Every answer comes with citations. See exactly which snippets were used to generate the response, complete with similarity scores."
+          },
+          {
+              id: "conversation-history",
+              title: "Conversation History",
+              content: "Your questions and answers are saved locally, allowing you to easily revisit past insights without re-querying."
           }
       ]
   }

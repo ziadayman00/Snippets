@@ -17,10 +17,20 @@ export function QuickCreateDialog({ technologies }: QuickCreateDialogProps) {
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
-    // The server action will handle the redirect
-    await createEntry(formData);
-    setLoading(false);
-    setOpen(false);
+    try {
+      const result = await createEntry(formData);
+      if (result.success && result.entryId) {
+        const technologyId = formData.get("technologyId") as string;
+        router.push(`/technology/${technologyId}/edit/${result.entryId}`);
+        router.refresh();
+      }
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to create entry:", error);
+      alert("Failed to create entry");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

@@ -4,6 +4,7 @@ import { db } from "@/lib/drizzle/db";
 import { entries, technologies } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
 import { and, desc, eq, lt, or, sql, isNull, asc } from "drizzle-orm";
+import { calculateSRS } from "@/lib/utils/srs";
 
 export async function getReviewSnippets() {
   const supabase = await createClient();
@@ -15,12 +16,8 @@ export async function getReviewSnippets() {
     throw new Error("Unauthorized");
   }
 
-  // 24 hours ago
-  const oneDayAgo = new Date();
-  oneDayAgo.setHours(oneDayAgo.getHours() - 24);
-
-  // Fetch up to 5 random snippets that haven't been viewed in the last 24 hours
-  // OR have never been viewed.
+  // Fetch items due for review (or new items)
+  // New items have null nextReviewDate
   const snippets = await db
     .select({
         id: entries.id,
@@ -29,14 +26,75 @@ export async function getReviewSnippets() {
         technologyId: entries.technologyId,
         technologyName: technologies.name,
         lastViewedAt: entries.lastViewedAt,
+        // SRS info (optional display)
+        interval: entries.interval,
+        repetitions: entries.repetitions,
     })
     .from(entries)
     .innerJoin(technologies, eq(entries.technologyId, technologies.id))
-    .where(eq(entries.userId, user.id))
-    .orderBy(asc(entries.lastViewedAt)) // Oldest (or nulls) first
-    .limit(5);
+    .where(
+        and(
+            eq(entries.userId, user.id),
+            or(
+                isNull(entries.nextReviewDate),
+                lt(entries.nextReviewDate, new Date())
+            )
+        )
+    )
+    .orderBy(asc(entries.nextReviewDate)) // Overdue first
+    .limit(10); // Batch of 10
 
   return snippets;
+}
+
+/**
+ * Submit a review grade for an entry
+ * Grade: 0-5
+ */
+export async function submitReview(entryId: string, grade: number) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    // Fetch current stats
+    const entry = await db.query.entries.findFirst({
+        where: and(eq(entries.id, entryId), eq(entries.userId, user.id)),
+        columns: {
+            interval: true,
+            repetitions: true,
+            easinessFactor: true,
+        }
+    });
+
+    if (!entry) throw new Error("Entry not found");
+
+    // Calculate new stats
+    const result = calculateSRS(
+        grade,
+        entry.interval,
+        entry.repetitions,
+        entry.easinessFactor
+    );
+
+    // Calculate next date
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + result.interval);
+
+    // Update DB
+    await db.update(entries)
+        .set({
+            interval: result.interval,
+            repetitions: result.repetitions,
+            easinessFactor: result.easinessFactor,
+            nextReviewDate: nextDate,
+            lastViewedAt: new Date(),
+        })
+        .where(eq(entries.id, entryId));
+    
+    return { success: true, nextDate };
 }
 
 /**
@@ -52,8 +110,6 @@ export async function getReviewCount(): Promise<number> {
     return 0;
   }
 
-  const now = new Date();
-
   const dueSnippets = await db
     .select({ count: sql<number>`count(*)` })
     .from(entries)
@@ -61,11 +117,12 @@ export async function getReviewCount(): Promise<number> {
       and(
         eq(entries.userId, user.id),
         or(
-          lt(entries.lastViewedAt, sql`NOW() - INTERVAL '24 hours'`),
-          isNull(entries.lastViewedAt)
+            isNull(entries.nextReviewDate),
+            lt(entries.nextReviewDate, new Date())
         )
       )
     );
 
   return Number(dueSnippets[0]?.count || 0);
 }
+
