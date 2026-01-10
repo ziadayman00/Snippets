@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { TiptapEditor } from "./tiptap-editor";
 import Link from "next/link";
 import { EditorGuide } from "./editor-guide";
+import { EditorTour } from "@/components/onboarding/editor-tour";
 import { Calendar, Link as LinkIcon, ArrowRightLeft, ChevronLeft, Save, Loader2, AlertCircle, Clock, Trash2, PanelRight, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { TagInput } from "@/components/tags/tag-input";
@@ -298,6 +299,7 @@ export function UnifiedEntryEditor({
                         <div className="h-4 w-px bg-[var(--border-primary)] mx-1 hidden sm:block" />
 
                         <button
+                            id="editor-save"
                             onClick={handleSave}
                             disabled={isSaving || saveStatus === 'saved' || (!title.trim())}
                             className={`px-3 sm:px-4 py-1.5 rounded-full text-sm font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-2 transition-all shadow-sm whitespace-nowrap ${
@@ -349,7 +351,7 @@ export function UnifiedEntryEditor({
                             autoComplete="off"
                         />
                         
-                        <div className="opacity-100 sm:opacity-60 sm:group-hover/header:opacity-100 transition-opacity duration-300">
+                        <div id="editor-tags" className="opacity-100 sm:opacity-60 sm:group-hover/header:opacity-100 transition-opacity duration-300">
                              <TagInput initialTags={tags} onChange={handleTagsChange} />
                         </div>
                     </div>
@@ -358,7 +360,7 @@ export function UnifiedEntryEditor({
                     <div className="h-px w-full bg-gradient-to-r from-transparent via-[var(--border-primary)] to-transparent opacity-50" />
 
                     {/* Editor */}
-                    <div className="min-h-[500px]">
+                    <div id="editor-area" className="min-h-[500px]">
                         <TiptapEditor 
                             content={typeof content === 'string' ? content : JSON.stringify(content)} 
                             name="content" 
@@ -487,6 +489,7 @@ export function UnifiedEntryEditor({
                 {/* Sidebar Footer */}
                 <div className="p-6 border-t border-[var(--border-primary)] bg-[var(--bg-tertiary)]/50">
                     <EditorGuide />
+                    <EditorTour />
                 </div>
             </div>
         </div>

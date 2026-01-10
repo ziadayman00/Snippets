@@ -28,6 +28,9 @@ export function ActivityHeatmap({ data }: HeatmapProps) {
     if (!fullData.some(d => d.date === endDateStr)) {
         fullData.push({ date: endDateStr, count: 0, level: 0 });
     }
+    
+    // Sort by date to ensure correct range rendering
+    fullData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return (
         <Card className="border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden">

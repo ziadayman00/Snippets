@@ -21,7 +21,7 @@ export function EditorTour() {
                     } 
                 },
                 { 
-                    element: "#editor-title", 
+                    element: "#editor-title-area", 
                     popover: { 
                         title: "Identify It", 
                         description: "Give your snippet a clear, descriptive title to make it easy to find later via AI search." 

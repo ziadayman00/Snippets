@@ -318,16 +318,16 @@ export function TiptapEditor({
       {editable && (
         <>
             <div 
-                className={`editor-toolbar sticky z-10 flex flex-wrap gap-1 items-center p-2 mb-4 bg-[var(--bg-tertiary)]/50 backdrop-blur rounded-lg border border-[var(--border-primary)]/50 transition-opacity duration-200 ${
+                className={`editor-toolbar sticky z-10 flex items-center p-2 mb-4 bg-[var(--bg-tertiary)]/50 backdrop-blur rounded-lg border border-[var(--border-primary)]/50 transition-opacity duration-200 overflow-x-auto no-scrollbar snap-x ${
               isFullScreen ? 'px-4 py-3 rounded-none border-x-0 border-t-0' : ''
             }`}
                 style={{ top: isFullScreen ? 0 : stickyOffset }}
             >
             
-             <div className="hidden lg:block mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+             <div className="hidden lg:block mx-1 h-5 w-px bg-[var(--border-primary)]/50 shrink-0" />
 
              {/* History Group */}
-             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+             <div className="hidden sm:flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 shrink-0 snap-start">
                 <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().undo().run(); }}
                     isActive={false}
@@ -342,10 +342,10 @@ export function TiptapEditor({
                 />
              </div>
 
-             <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+             <div className="hidden sm:block mx-1 h-5 w-px bg-[var(--border-primary)]/50 shrink-0" />
 
              {/* Style Group (Headings) */}
-             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 shrink-0 snap-start mr-2">
                  <div className="flex items-center">
                     <ToolbarButton
                         onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 1 }).run(); }}
@@ -368,10 +368,10 @@ export function TiptapEditor({
                  </div>
              </div>
 
-             <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+
 
              {/* Formatting Group */}
-             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+             <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 shrink-0 snap-start mr-2">
                 <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
                     isActive={editor.isActive("bold")}
@@ -440,7 +440,7 @@ export function TiptapEditor({
                 </div>
             </div>
 
-            <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+
             
             {/* Alignment Group */}
              <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
@@ -464,10 +464,10 @@ export function TiptapEditor({
                 />
              </div>
 
-             <div className="mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
+
 
              {/* Lists & Insert Group */}
-            <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
+            <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 shrink-0 snap-start">
                 <ToolbarButton
                     onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run(); }}
                     isActive={editor.isActive("bulletList")}
