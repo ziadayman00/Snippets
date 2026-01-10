@@ -36,6 +36,8 @@ interface EditorProps {
   onSidebarToggle?: () => void;
   isSidebarOpen?: boolean;
   currentEntryId?: string;
+  variant?: "default" | "clean";
+  stickyOffset?: number;
 }
 
 // Custom Heading to enforce specific Tailwind classes for visual hierarchy
@@ -81,6 +83,8 @@ export function TiptapEditor({
   onSidebarToggle,
   isSidebarOpen = true,
   currentEntryId,
+  variant = "default",
+  stickyOffset = 0,
 }: EditorProps) {
   const [jsonContent, setJsonContent] = useState(content);
   const [menuStyle, setMenuStyle] = useState<{ top: number; left: number } | null>(null);
@@ -301,30 +305,26 @@ export function TiptapEditor({
 
   return (
     <div 
-      className={`editor-wrapper flex flex-col border border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden transition-all focus-within:ring-1 focus-within:ring-[var(--focus-ring)] ${
+      className={`editor-wrapper flex flex-col transition-all ${
+        variant === "default" 
+          ? "border border-[var(--border-primary)] bg-[var(--bg-secondary)] focus-within:ring-1 focus-within:ring-[var(--focus-ring)] overflow-hidden" 
+          : "bg-transparent"
+      } ${
         isFullScreen 
-          ? "fixed inset-0 z-[100] h-screen w-screen rounded-none border-0" 
+          ? "fixed inset-0 z-[100] h-screen w-screen rounded-none border-0 bg-[var(--bg-primary)]" 
           : `relative rounded-xl ${className}`
       }`}
     >
       {editable && (
         <>
-            <div className={`editor-toolbar sticky top-0 z-10 flex flex-wrap gap-1 border-b border-[var(--border-primary)] bg-[var(--bg-tertiary)]/95 backdrop-blur p-2 items-center ${isFullScreen ? 'px-4 py-3' : ''}`}>
+            <div 
+                className={`editor-toolbar sticky z-10 flex flex-wrap gap-1 items-center p-2 mb-4 bg-[var(--bg-tertiary)]/50 backdrop-blur rounded-lg border border-[var(--border-primary)]/50 transition-opacity duration-200 ${
+              isFullScreen ? 'px-4 py-3 rounded-none border-x-0 border-t-0' : ''
+            }`}
+                style={{ top: isFullScreen ? 0 : stickyOffset }}
+            >
             
-             {/* Sidebar Toggle (First Item) */}
-             {onSidebarToggle && !isFullScreen && (
-                 <>
-                    <div className="hidden lg:flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 mr-1">
-                        <ToolbarButton
-                            onClick={(e) => { e.preventDefault(); onSidebarToggle(); }}
-                            isActive={false} // Always strictly a button, not a "state" toggle in terms of active highlighting
-                            icon={isSidebarOpen ? <SidebarClose className="h-4 w-4" /> : <SidebarOpen className="h-4 w-4" />}
-                            title={isSidebarOpen ? "Hide Sidebar (Focus Mode)" : "Show Sidebar"}
-                        />
-                    </div>
-                    <div className="hidden lg:block mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
-                 </>
-             )}
+             <div className="hidden lg:block mx-1 h-5 w-px bg-[var(--border-primary)]/50" />
 
              {/* History Group */}
              <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5">
@@ -504,18 +504,7 @@ export function TiptapEditor({
                 />
             </div>
 
-            {/* Spacer */}
-            <div className="flex-1" />
 
-             {/* Full Screen Toggle */}
-            <div className="flex bg-[var(--bg-secondary)] rounded-md border border-[var(--border-primary)] p-0.5 ml-1">
-               <ToolbarButton
-                  onClick={toggleFullScreen}
-                  isActive={isFullScreen}
-                  icon={isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                  title={isFullScreen ? "Minimize" : "Full Screen"}
-               />
-            </div>
 
             </div>
 
@@ -554,7 +543,7 @@ export function TiptapEditor({
         </>
       )}
       
-      <div className="editor-scroll-container flex-1 overflow-y-auto">
+      <div className={`editor-scroll-container flex-1 ${variant === "default" ? "overflow-y-auto" : ""}`}>
         <EditorContent editor={editor} />
       </div>
       {name && <input type="hidden" name={name} value={jsonContent} />}

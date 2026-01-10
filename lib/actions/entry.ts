@@ -175,3 +175,30 @@ export async function updateEntry(formData: FormData) {
   
   redirect(`/technology/${technologyId}`);
 }
+
+export async function autoSaveEntry(id: string, technologyId: string, title: string, content: any, tagNames: string[]) {
+    // Exact same logic as updateEntry but no redirect
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
+
+    try {
+        await db.update(entries)
+            .set({
+                title,
+                content,
+                updatedAt: new Date(),
+            })
+            .where(eq(entries.id, id));
+        
+        await updateEntryTags(id, tagNames);
+        await syncSnippetLinks(id, content);
+        await upsertEmbedding(id, title, content);
+
+        // revalidatePath(`/technology/${technologyId}`); // Avoid refreshing page on auto-save
+        return { success: true, timestamp: new Date() };
+    } catch (error) {
+        console.error("Auto-save failed:", error);
+        return { success: false };
+    }
+}

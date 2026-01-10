@@ -1,9 +1,9 @@
 "use server";
 
 import { db } from "@/lib/drizzle/db";
-import { technologies } from "@/lib/drizzle/schema";
+import { technologies, entries } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
-import { eq, and, ilike } from "drizzle-orm";
+import { eq, and, ilike, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createTechnology(formData: FormData) {
@@ -132,15 +132,33 @@ export async function searchTechnologies(query: string) {
 
   if (!user) return [];
 
-  return db
+  const techs = await db
     .select({
       id: technologies.id,
       name: technologies.name,
+      icon: technologies.icon,
     })
     .from(technologies)
     .where(and(
       eq(technologies.userId, user.id),
       ilike(technologies.name, `%${query}%`)
     ))
-    .limit(10);
+    .limit(50);
+
+  // Get entry counts for each technology
+  const techsWithCounts = await Promise.all(
+    techs.map(async (tech) => {
+      const [countResult] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(entries)
+        .where(eq(entries.technologyId, tech.id));
+      
+      return {
+        ...tech,
+        entriesCount: countResult?.count || 0,
+      };
+    })
+  );
+
+  return techsWithCounts;
 }

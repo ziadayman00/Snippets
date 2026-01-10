@@ -103,6 +103,18 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
       extensions: [
         basicSetup,
         oneDark,
+        EditorView.theme({
+            "&": {
+                direction: "ltr",
+                textAlign: "left",
+                unicodeBidi: "isolate"
+            },
+            ".cm-content": {
+                direction: "ltr",
+                textAlign: "left",
+                unicodeBidi: "isolate"
+            }
+        }),
         languageCompartment.current.of(
           languageMap[initialLang] || languageMap['javascript']
         ),
@@ -144,7 +156,24 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
     const view = new EditorView({
       state: startState,
       parent: editorRef.current,
+      dispatch: (tr) => {
+         view.update([tr]);
+      }
     });
+
+    // Enforce LTR on the content DOM element immediately
+    if (view.contentDOM) {
+        view.contentDOM.setAttribute("dir", "ltr");
+        view.contentDOM.style.direction = "ltr";
+        view.contentDOM.style.textAlign = "left";
+    }
+    
+    // Also enforce on scroll element (parent of content)
+    if (view.scrollDOM) {
+        view.scrollDOM.setAttribute("dir", "ltr");
+        view.scrollDOM.style.direction = "ltr";
+        view.scrollDOM.style.textAlign = "left";
+    }
 
     viewRef.current = view;
     isInitializedRef.current = true;
@@ -203,7 +232,7 @@ const CodeMirrorBlockComponent = (props: NodeViewProps) => {
   // languages variable removed from here because it's already defined above.
 
   return (
-    <NodeViewWrapper dir="ltr" className="code-block my-4 rounded-lg border border-[var(--border-primary)] bg-[#1e1e1e] shadow-sm">
+    <NodeViewWrapper dir="ltr" contentEditable={false} className="code-block my-4 rounded-lg border border-[var(--border-primary)] bg-[#1e1e1e] shadow-sm">
       {/* Header */}
       <div
         className="flex items-center justify-between border-b border-[#2a2a2a] bg-[#252526] px-4 py-2 select-none rounded-t-lg"

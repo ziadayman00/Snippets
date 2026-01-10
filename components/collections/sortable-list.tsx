@@ -1,32 +1,32 @@
 "use client";
 
-import { useState } from "react";
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
   useSortable,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { reorderCollection } from "@/lib/actions/collections";
+import { reorderCollection, removeFromCollection } from "@/lib/actions/collections";
+import { useState, useId } from "react";
 
 // Helper to determine ID
 const getItemId = (item: any) =>
   item.entryId ? `entry-${item.entryId}` : `tech-${item.technologyId}`;
 
-function SortableItem({ id, item }: { id: string; item: any }) {
+function SortableItem({ id, item, onRemove }: { id: string; item: any; onRemove: () => void }) {
   const {
     attributes,
     listeners,
@@ -51,7 +51,7 @@ function SortableItem({ id, item }: { id: string; item: any }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="group flex items-center gap-4 p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] hover:border-[var(--accent-primary)]/30 transition-all mb-4"
+      className="group flex items-center gap-4 p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] hover:border-[var(--accent-primary)]/30 transition-all mb-4 relative"
     >
       <div
         {...attributes}
@@ -96,6 +96,17 @@ function SortableItem({ id, item }: { id: string; item: any }) {
             </Link>
         ) : null}
       </div>
+
+      <button
+        onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+        }}
+        className="p-2 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+        title="Remove"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
     </div>
   );
 }
@@ -108,12 +119,30 @@ export function SortableList({
   items: any[];
 }) {
   const [items, setItems] = useState(initialItems);
+  const id = useId(); 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const handleRemove = async (index: number) => {
+      const itemToDelete = items[index];
+      const newItems = [...items];
+      newItems.splice(index, 1);
+      setItems(newItems);
+      
+      const type = itemToDelete.entry ? 'entry' : 'technology';
+      const id = itemToDelete.entry ? itemToDelete.entryId : itemToDelete.technologyId;
+      
+      try {
+          await removeFromCollection(collectionId, id, type);
+      } catch (error) {
+          console.error("Failed to remove", error);
+          setItems(items); // revert
+      }
+  };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -126,7 +155,6 @@ export function SortableList({
         const newItems = arrayMove(items, oldIndex, newIndex);
 
         // Call server action
-        // Map to format aligned with reorderCollection action
         const updates = newItems.map((item) => ({
              entryId: item.entryId || null,
              technologyId: item.technologyId || null
@@ -134,7 +162,6 @@ export function SortableList({
         
         reorderCollection(collectionId, updates).catch((err) => {
             console.error("Reorder failed", err);
-            // Optionally revert state here if critical
         });
 
         return newItems;
@@ -144,6 +171,7 @@ export function SortableList({
 
   return (
     <DndContext
+      id={id}
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
@@ -153,8 +181,13 @@ export function SortableList({
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-4">
-          {items.map((item) => (
-            <SortableItem key={getItemId(item)} id={getItemId(item)} item={item} />
+          {items.map((item, index) => (
+            <SortableItem 
+                key={getItemId(item)} 
+                id={getItemId(item)} 
+                item={item} 
+                onRemove={() => handleRemove(index)}
+            />
           ))}
         </div>
       </SortableContext>

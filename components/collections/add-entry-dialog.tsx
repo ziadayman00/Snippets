@@ -5,6 +5,7 @@ import { searchSnippets } from "@/lib/actions/links";
 import { searchTechnologies } from "@/lib/actions/technology";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Loader2, Plus, Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
 export function AddEntryDialog({
@@ -21,6 +22,7 @@ export function AddEntryDialog({
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState<'entry' | 'technology'>('entry');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setQuery("");
@@ -56,10 +58,17 @@ export function AddEntryDialog({
 
   const handleAdd = async (item: any) => {
     try {
-        await addEntryToCollection(collectionId, item.id, type);
+        const result = await addEntryToCollection(collectionId, item.id, type);
+        
+        if (!result.success) {
+            alert(result.error || "Failed to add entry");
+            return;
+        }
+
         onOpenChange(false);
         setQuery("");
         setResults([]);
+        router.refresh();
     } catch (error) {
         alert("Failed to add entry");
     }

@@ -73,29 +73,7 @@ export async function getCollection(id: string) {
   return collection;
 }
 
-export async function addEntryToCollection(collectionId: string, itemId: string, type: 'entry' | 'technology' = 'entry') {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Unauthorized");
 
-    // Get max order
-    const maxOrderResult = await db
-        .select({ maxOrder: sql<number>`MAX(${collectionEntries.order})` })
-        .from(collectionEntries)
-        .where(eq(collectionEntries.collectionId, collectionId));
-    
-    const nextOrder = (maxOrderResult[0]?.maxOrder ?? -1) + 1;
-
-    await db.insert(collectionEntries).values({
-        collectionId,
-        order: nextOrder,
-        entryId: type === 'entry' ? itemId : null,
-        technologyId: type === 'technology' ? itemId : null,
-    });
-    
-    revalidatePath(`/collections/${collectionId}`);
-    return { success: true };
-}
 
 export async function reorderCollection(
   collectionId: string,
@@ -139,6 +117,64 @@ export async function reorderCollection(
   return { success: true };
 }
 
+export async function addEntryToCollection(collectionId: string, itemId: string, type: 'entry' | 'technology' = 'entry') {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
+
+    // Check for duplicates
+    const existing = await db.query.collectionEntries.findFirst({
+        where: and(
+            eq(collectionEntries.collectionId, collectionId),
+            type === 'entry' ? eq(collectionEntries.entryId, itemId) : eq(collectionEntries.technologyId, itemId)
+        )
+    });
+
+    if (existing) {
+        return { success: false, error: "Item already exists in collection" };
+    }
+
+    // Get max order
+    const maxOrderResult = await db
+        .select({ maxOrder: sql<number>`MAX(${collectionEntries.order})` })
+        .from(collectionEntries)
+        .where(eq(collectionEntries.collectionId, collectionId));
+    
+    const nextOrder = (maxOrderResult[0]?.maxOrder ?? -1) + 1;
+
+    await db.insert(collectionEntries).values({
+        collectionId,
+        order: nextOrder,
+        entryId: type === 'entry' ? itemId : null,
+        technologyId: type === 'technology' ? itemId : null,
+    });
+    
+    revalidatePath(`/collections/${collectionId}`);
+    return { success: true };
+}
+
+export async function removeFromCollection(collectionId: string, itemId: string, type: 'entry' | 'technology') {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
+
+    // Verify ownership via collection
+    const collection = await db.query.collections.findFirst({
+        where: and(eq(collections.id, collectionId), eq(collections.userId, user.id)),
+    });
+
+    if (!collection) throw new Error("Unauthorized");
+
+    await db.delete(collectionEntries)
+        .where(and(
+            eq(collectionEntries.collectionId, collectionId),
+            type === 'entry' ? eq(collectionEntries.entryId, itemId) : eq(collectionEntries.technologyId, itemId)
+        ));
+
+    revalidatePath(`/collections/${collectionId}`);
+    return { success: true };
+}
+
 export async function getCollectionForLearning(id: string) {
   const supabase = await createClient();
   const {
@@ -156,7 +192,14 @@ export async function getCollectionForLearning(id: string) {
                 entry: {
                     with: { technology: true }
                 },
-                technology: true
+                technology: {
+                    with: {
+                        entries: {
+                            orderBy: (entries, { asc }) => [asc(entries.createdAt)],
+                            with: { technology: true }
+                        }
+                    }
+                }
             }
         }
     }

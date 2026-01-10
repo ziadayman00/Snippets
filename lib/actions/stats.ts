@@ -3,76 +3,86 @@
 import { db } from "@/lib/drizzle/db";
 import { entries, technologies } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, gte, and } from "drizzle-orm";
+import { subDays, format } from "date-fns";
 
-export interface StatsData {
-  totalSnippets: number;
-  totalTechnologies: number;
-  techDistribution: Array<{
-    name: string;
-    count: number;
-    percentage: number;
-    color: string;
-  }>;
-  recentActivity: number; // Snippets created in last 7 days
-}
+export async function getStats() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
 
-export async function getUserStats(): Promise<StatsData> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    // 1. Total Snippets
+    const totalSnippets = await db.$count(entries, eq(entries.userId, user.id));
 
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  // 1. Get all entries
-  const allEntries = await db
-    .select({
-      id: entries.id,
-      technologyId: entries.technologyId,
-      createdAt: entries.createdAt,
+    // 2. Most Active Technology
+    const topTechResult = await db.select({
+        name: technologies.name,
+        count: sql<number>`count(${entries.id})`
     })
     .from(entries)
-    .where(eq(entries.userId, user.id));
+    .innerJoin(technologies, eq(entries.technologyId, technologies.id))
+    .where(eq(entries.userId, user.id))
+    .groupBy(technologies.name)
+    .orderBy(desc(sql`count(${entries.id})`))
+    .limit(1);
 
-  const totalSnippets = allEntries.length;
+    const mostActiveTech = topTechResult[0]?.name || "None";
 
-  // 2. Calculate distribution
-  const techCounts: Record<string, number> = {};
-  allEntries.forEach((e) => {
-    techCounts[e.technologyId] = (techCounts[e.technologyId] || 0) + 1;
-  });
-
-  // Get tech details
-  const allTechnologies = await db.select().from(technologies);
-  
-  const techDistribution = allTechnologies
-    .map((tech) => {
-      const count = techCounts[tech.id] || 0;
-      return {
-        name: tech.name,
-        count,
-        percentage: totalSnippets > 0 ? Math.round((count / totalSnippets) * 100) : 0,
-        color: "var(--accent-primary)",
-      };
+    // 3. Heatmap Data (Last 365 Days)
+    const oneYearAgo = subDays(new Date(), 365);
+    const activityData = await db.select({
+        date: sql<string>`date(${entries.createdAt})`,
+        count: sql<number>`count(${entries.id})`
     })
-    .filter((t) => t.count > 0)
-    .sort((a, b) => b.count - a.count);
+    .from(entries)
+    .where(and(
+        eq(entries.userId, user.id),
+        gte(entries.createdAt, oneYearAgo)
+    ))
+    .groupBy(sql`date(${entries.createdAt})`);
+    
+    const heatmapData = activityData.map((d: { date: string, count: number }) => ({
+        date: d.date, 
+        count: Number(d.count),
+        level: Math.min(4, Math.ceil(Number(d.count) / 2)) 
+    }));
 
-  // 3. Recent activity (last 7 days)
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  
-  const recentActivity = allEntries.filter(
-    (e) => new Date(e.createdAt) >= sevenDaysAgo
-  ).length;
+    // 4. Streak Calculation
+    const datesResult = await db.select({
+        date: sql<string>`date(${entries.createdAt})`
+    })
+    .from(entries)
+    .where(eq(entries.userId, user.id))
+    .groupBy(sql`date(${entries.createdAt})`)
+    .orderBy(desc(sql`date(${entries.createdAt})`));
 
-  return {
-    totalSnippets,
-    totalTechnologies: techDistribution.length,
-    techDistribution,
-    recentActivity,
-  };
+    const sortedDates = datesResult.map((d: { date: string }) => d.date);
+    const dateSet = new Set(sortedDates);
+    
+    let streak = 0;
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+    
+    const hasActivityToday = dateSet.has(today);
+    const hasActivityYesterday = dateSet.has(yesterday);
+    
+    if (hasActivityToday || hasActivityYesterday) {
+        let anchor = hasActivityToday ? new Date() : subDays(new Date(), 1);
+        while (true) {
+            const dateStr = format(anchor, 'yyyy-MM-dd');
+            if (dateSet.has(dateStr)) {
+                streak++;
+                anchor = subDays(anchor, 1);
+            } else {
+                break;
+            }
+        }
+    }
+
+    return {
+        totalSnippets,
+        mostActiveTech,
+        heatmapData,
+        streak
+    };
 }

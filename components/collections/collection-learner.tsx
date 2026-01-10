@@ -8,14 +8,40 @@ import { useRouter } from "next/navigation";
 
 export function CollectionLearner({ collection }: { collection: any }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [flatItems, setFlatItems] = useState<any[]>([]);
   const router = useRouter();
   
-  const entries = collection.entries;
-  const currentItem = entries[currentIndex];
+  // Flatten entries on mount
+  useEffect(() => {
+      const items: any[] = [];
+      collection.entries.forEach((item: any) => {
+          if (item.entry) {
+              items.push({ type: 'snippet', data: item.entry });
+          } else if (item.technology) {
+              // Intro Card
+              items.push({ type: 'tech-intro', data: item.technology });
+              // Expand Snippets
+              if (item.technology.entries) {
+                  item.technology.entries.forEach((techEntry: any) => {
+                      items.push({ 
+                          type: 'snippet', 
+                          data: { 
+                              ...techEntry, 
+                              technology: item.technology 
+                          } 
+                      });
+                  });
+              }
+          }
+      });
+      setFlatItems(items);
+  }, [collection]);
+
+  const currentItem = flatItems[currentIndex];
   
   // Handlers
   const handleNext = () => {
-    if (currentIndex < entries.length - 1) {
+    if (currentIndex < flatItems.length - 1) {
         setCurrentIndex(prev => prev + 1);
         window.scrollTo(0, 0);
     }
@@ -37,13 +63,13 @@ export function CollectionLearner({ collection }: { collection: any }) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentIndex, entries.length]);
+  }, [currentIndex, flatItems.length]);
 
-  if (!currentItem) return <div>Empty collection</div>;
+  if (!currentItem) return null; // Wait for hydration
 
-  const isSnippet = !!currentItem.entry;
-  const content = isSnippet ? currentItem.entry : currentItem.technology;
-  const progress = ((currentIndex + 1) / entries.length) * 100;
+  const isSnippet = currentItem.type === 'snippet';
+  const content = currentItem.data;
+  const progress = ((currentIndex + 1) / flatItems.length) * 100;
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-primary)]">
@@ -65,7 +91,7 @@ export function CollectionLearner({ collection }: { collection: any }) {
                           {collection.title}
                       </span>
                       <span className="text-sm font-semibold text-[var(--text-primary)]">
-                          {currentIndex + 1} of {entries.length}
+                          {currentIndex + 1} of {flatItems.length}
                       </span>
                   </div>
               </div>
@@ -80,7 +106,7 @@ export function CollectionLearner({ collection }: { collection: any }) {
                   </button>
                   <button
                      onClick={handleNext}
-                     disabled={currentIndex === entries.length - 1}
+                     disabled={currentIndex === flatItems.length - 1}
                      className="p-2 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--bg-tertiary)] transition-colors"
                   >
                       <ChevronRight className="h-4 w-4" />
@@ -109,6 +135,7 @@ export function CollectionLearner({ collection }: { collection: any }) {
                    <div className="prose prose-invert max-w-none">
                        {/* If content is JSON string, pass it. If null, show empty */}
                        <TiptapEditor 
+                           key={content.id} // Force re-mount on change
                            content={typeof content.content === 'string' ? content.content : JSON.stringify(content.content)} 
                            editable={false} 
                            className="border-none px-0 bg-transparent min-h-0"
@@ -162,7 +189,7 @@ export function CollectionLearner({ collection }: { collection: any }) {
                     </div>
                 </button>
 
-                {currentIndex < entries.length - 1 ? (
+                {currentIndex < flatItems.length - 1 ? (
                     <button
                         onClick={handleNext}
                         className="flex items-center gap-3 bg-[var(--text-primary)] text-[var(--bg-primary)] px-6 py-3 rounded-xl hover:scale-105 transition-transform font-medium"
