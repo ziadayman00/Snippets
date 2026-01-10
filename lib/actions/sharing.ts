@@ -31,7 +31,7 @@ export async function togglePublicVisibility(entryId: string, makePublic: boolea
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
@@ -43,7 +43,7 @@ export async function togglePublicVisibility(entryId: string, makePublic: boolea
       .limit(1);
 
     if (!entry) {
-      throw new Error("Entry not found");
+      return { success: false, error: "Entry not found" };
     }
 
     // Generate slug if making public and no slug exists
@@ -59,10 +59,10 @@ export async function togglePublicVisibility(entryId: string, makePublic: boolea
 
     revalidatePath(`/technology`);
     
-    return { success: true, slug };
+    return { success: true, slug, isPublic: makePublic };
   } catch (error) {
     console.error("Failed to toggle visibility:", error);
-    throw new Error("Failed to update visibility");
+    return { success: false, error: "Failed to update visibility" };
   }
 }
 

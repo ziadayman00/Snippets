@@ -1,5 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { getPublicSnippet } from '@/lib/actions/sharing';
+import { getPublicTechnology } from '@/lib/actions/technology-sharing';
+import { getPublicCollection } from '@/lib/actions/collection-sharing';
 
 export const runtime = 'edge';
 
@@ -7,36 +9,70 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
+    const type = searchParams.get('type') || 'snippet';
 
     if (!slug) {
       return new Response('Missing slug parameter', { status: 400 });
     }
 
-    const snippet = await getPublicSnippet(slug);
+    let data;
+    let title = '';
+    let subtitle = '';
+    let icon = '';
+    let badge = '';
+    let views = 0;
 
-    if (!snippet) {
-      return new Response('Snippet not found', { status: 404 });
-    }
-
-    // Extract first few lines of text from content
-    const extractText = (content: any): string => {
-      if (typeof content === 'string') return content;
-      if (!content || !content.content) return '';
+    // Fetch data based on type
+    if (type === 'technology') {
+      const tech = await getPublicTechnology(slug);
+      if (!tech) return new Response('Technology not found', { status: 404 });
       
-      let text = '';
-      const traverse = (node: any) => {
-        if (node.type === 'text') {
-          text += node.text + ' ';
-        }
-        if (node.content && Array.isArray(node.content)) {
-          node.content.forEach(traverse);
-        }
-      };
-      traverse(content);
-      return text.slice(0, 150) + '...';
-    };
+      data = tech;
+      title = tech.name;
+      subtitle = `${tech.snippets?.length || 0} public snippets curated for you`;
+      icon = tech.icon || '🚀';
+      badge = 'Technology';
+      views = tech.views;
+    } else if (type === 'collection') {
+      const collection = await getPublicCollection(slug);
+      if (!collection) return new Response('Collection not found', { status: 404 });
+      
+      data = collection;
+      title = collection.title;
+      subtitle = collection.description || `${collection.entries.length} items in this collection`;
+      icon = '📚';
+      badge = 'Collection';
+      views = collection.views;
+    } else {
+      // Default to snippet
+      const snippet = await getPublicSnippet(slug);
+      if (!snippet) return new Response('Snippet not found', { status: 404 });
 
-    const preview = extractText(snippet.content);
+      // Extract text content logic...
+      const extractText = (content: any): string => {
+        if (typeof content === 'string') return content;
+        if (!content || !content.content) return '';
+        
+        let text = '';
+        const traverse = (node: any) => {
+          if (node.type === 'text') {
+            text += node.text + ' ';
+          }
+          if (node.content && Array.isArray(node.content)) {
+            node.content.forEach(traverse);
+          }
+        };
+        traverse(content);
+        return text.slice(0, 150) + '...';
+      };
+
+      data = snippet;
+      title = snippet.title;
+      subtitle = extractText(snippet.content);
+      icon = snippet.technologyIcon || '📝';
+      badge = snippet.technologyName || 'Snippet';
+      views = snippet.views;
+    }
 
     return new ImageResponse(
       (
@@ -66,7 +102,7 @@ export async function GET(request: Request) {
                 display: 'flex',
               }}
             >
-              {snippet.technologyIcon} {snippet.technologyName}
+              {icon} {badge}
             </div>
           </div>
 
@@ -90,7 +126,7 @@ export async function GET(request: Request) {
                 maxWidth: '900px',
               }}
             >
-              {snippet.title}
+              {title}
             </h1>
             <p
               style={{
@@ -101,7 +137,7 @@ export async function GET(request: Request) {
                 maxWidth: '900px',
               }}
             >
-              {preview}
+              {subtitle}
             </p>
           </div>
 
@@ -142,7 +178,7 @@ export async function GET(request: Request) {
                 color: '#6b7280',
               }}
             >
-              👁️ {snippet.views} views
+              👁️ {views} views
             </div>
           </div>
         </div>

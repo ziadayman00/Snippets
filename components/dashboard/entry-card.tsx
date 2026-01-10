@@ -18,6 +18,7 @@ type EntryCardProps = {
   selected?: boolean;
   onToggleSelect?: () => void;
   showTechnology?: boolean;
+  readonly?: boolean;
 };
 
 export function EntryCard({ 
@@ -26,7 +27,8 @@ export function EntryCard({
   selectable = false, 
   selected = false, 
   onToggleSelect,
-  showTechnology = false
+  showTechnology = false,
+  readonly = false
 }: EntryCardProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -61,22 +63,30 @@ export function EntryCard({
         </div>
       )}
 
-      {/* Main Click Area */}
-      {selectable ? (
-        // In selection mode, clicking anywhere toggles selection
-        <div 
-          onClick={onToggleSelect}
-          className="absolute inset-0 z-10 cursor-pointer"
-        />
-      ) : (
-        // Normal mode: Link to edit
-        <Link
-          href={`/technology/${technologyId}/edit/${entry.id}`}
-          className="absolute inset-0 z-0"
-        >
-          <span className="sr-only">View {entry.title}</span>
-        </Link>
-      )}
+       {/* Main Click Area */}
+       {selectable ? (
+         // In selection mode, clicking anywhere toggles selection
+         <div 
+           onClick={onToggleSelect}
+           className="absolute inset-0 z-10 cursor-pointer"
+         />
+       ) : !readonly ? (
+         // Normal mode: Link to edit
+         <Link
+           href={`/technology/${technologyId}/edit/${entry.id}`}
+           className="absolute inset-0 z-0"
+         >
+           <span className="sr-only">View {entry.title}</span>
+         </Link>
+       ) : (
+          // Read-only mode: Link to public snippet view
+          <Link
+            href={`/shared/${entry.id ? (entry as any).slug || entry.id : '#'}`} // Fallback for type safety
+            className="absolute inset-0 z-0"
+          >
+            <span className="sr-only">View {entry.title}</span>
+          </Link>
+       )}
 
       <div className="flex items-start justify-between relative z-10 pointer-events-none">
         <div className="pr-8"> {/* Add padding for checkbox space */}
@@ -98,8 +108,8 @@ export function EntryCard({
           </div>
         </div>
 
-        {/* Options Menu - Hide in selection mode */}
-        {!selectable && (
+        {/* Options Menu - Hide in selection mode and readonly mode */}
+        {!selectable && !readonly && (
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <button className="pointer-events-auto rounded-md p-1 pb-4 text-[var(--text-secondary)] opacity-0 transition-opacity hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)] group-hover:opacity-100 focus:opacity-100 focus:outline-none">

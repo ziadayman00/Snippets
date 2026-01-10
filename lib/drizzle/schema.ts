@@ -10,6 +10,10 @@ export const technologies = pgTable("technologies", {
   icon: text("icon"), // Can store icon name or SVG path
   userId: uuid("user_id").notNull(), // Managed by Supabase Auth
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  // Public sharing fields
+  isPublic: boolean("is_public").default(false).notNull(),
+  publicSlug: text("public_slug").unique(),
+  views: integer("views").default(0).notNull(),
 }, (table) => ({
   userIdIdx: index("technologies_user_id_idx").on(table.userId),
 }));
@@ -84,6 +88,19 @@ export const snippetViews = pgTable("snippet_views", {
   entryIdIdx: index("snippet_views_entry_id_idx").on(table.entryId),
   ipAddressIdx: index("snippet_views_ip_address_idx").on(table.ipAddress),
   viewedAtIdx: index("snippet_views_viewed_at_idx").on(table.viewedAt),
+}));
+
+// Resource Views - Unified view tracking for snippets, technologies, and collections
+export const resourceViews = pgTable("resource_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  resourceType: text("resource_type").notNull(), // 'snippet', 'technology', 'collection'
+  resourceId: uuid("resource_id").notNull(),
+  ipAddress: text("ip_address").notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+}, (table) => ({
+  resourceIdx: index("resource_views_resource_idx").on(table.resourceType, table.resourceId),
+  ipAddressIdx: index("resource_views_ip_address_idx").on(table.ipAddress),
+  viewedAtIdx: index("resource_views_viewed_at_idx").on(table.viewedAt),
 }));
 
 export const entriesRelations = relations(entries, ({ one, many }) => ({
@@ -175,6 +192,10 @@ export const collections = pgTable("collections", {
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  // Public sharing fields
+  isPublic: boolean("is_public").default(false).notNull(),
+  publicSlug: text("public_slug").unique(),
+  views: integer("views").default(0).notNull(),
 }, (table) => ({
   userIdIdx: index("collections_user_id_idx").on(table.userId),
 }));

@@ -6,6 +6,7 @@ import { AddEntryButton } from "@/components/collections/add-entry-button";
 import { SortableList } from "@/components/collections/sortable-list";
 import { ArrowLeft, BookOpen, GripVertical, Library } from "lucide-react";
 import Link from "next/link";
+import { ShareButton } from "@/components/editor/share-button";
 
 export default async function CollectionDetailsPage({
   params,
@@ -58,6 +59,12 @@ export default async function CollectionDetailsPage({
                 </div>
 
                 <div className="flex items-center gap-3">
+                     <ShareButton 
+                        resourceType="collection"
+                        resourceId={collection.id}
+                        isPublic={collection.isPublic}
+                        currentSlug={collection.publicSlug}
+                     />
                      <AddEntryButton collectionId={collection.id} />
                      <Link
                         href={`/collections/${collection.id}/learn`}

@@ -16,9 +16,10 @@ type Entry = {
 type SnippetListProps = {
   entries: Entry[];
   technologyId: string;
+  readonly?: boolean;
 };
 
-export function SnippetList({ entries, technologyId }: SnippetListProps) {
+export function SnippetList({ entries, technologyId, readonly = false }: SnippetListProps) {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, startTransition] = useTransition();
@@ -68,7 +69,7 @@ export function SnippetList({ entries, technologyId }: SnippetListProps) {
     <div>
       {/* List Header / Toolbar */}
       <div className="mb-4 flex items-center justify-end">
-        {entries.length > 0 && (
+        {entries.length > 0 && !readonly && (
           <button
             onClick={toggleSelectionMode}
             className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
@@ -134,7 +135,7 @@ export function SnippetList({ entries, technologyId }: SnippetListProps) {
             <div className="flex min-h-[250px] sm:min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border-primary)] bg-[var(--bg-secondary)]/50 p-6 sm:p-8 text-center text-[var(--text-muted)]">
               <FileText className="h-10 w-10 sm:h-12 sm:w-12 mb-3 sm:mb-4 opacity-50" />
               <p className="text-sm sm:text-base max-w-[320px]">
-                No entries yet. Click "New Entry" to add your first snippet.
+                {readonly ? "No public snippets in this technology yet." : "No entries yet. Click \"New Entry\" to add your first snippet."}
               </p>
             </div>
         ) : (
@@ -146,6 +147,7 @@ export function SnippetList({ entries, technologyId }: SnippetListProps) {
               selectable={isSelectionMode}
               selected={selectedIds.has(entry.id)}
               onToggleSelect={() => toggleSelect(entry.id)}
+              readonly={readonly}
             />
           ))
         )}

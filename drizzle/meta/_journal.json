@@ -43,6 +43,13 @@
       "when": 1768084436795,
       "tag": "0005_powerful_dexter_bennett",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768087367961,
+      "tag": "0006_sour_chameleon",
+      "breakpoints": true
     }
   ]
 }

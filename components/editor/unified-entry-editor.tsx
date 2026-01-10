@@ -291,7 +291,8 @@ export function UnifiedEntryEditor({
                          {!isNew && entryId && (
                              <>
                                  <ShareButton 
-                                     entryId={entryId}
+                                     resourceType="snippet"
+                                     resourceId={entryId}
                                      isPublic={isPublic}
                                      currentSlug={slug}
                                  />

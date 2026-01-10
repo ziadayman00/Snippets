@@ -6,6 +6,7 @@ import { Plus, Folder } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { SnippetList } from "@/components/dashboard/snippet-list";
+import { ShareButton } from "@/components/editor/share-button";
 
 export default async function TechnologyPage({
   params,
@@ -23,9 +24,11 @@ export default async function TechnologyPage({
   }
 
   // Fetch technology details
-  const tech = await db.query.technologies.findFirst({
-    where: eq(technologies.id, id),
-  });
+  const [tech] = await db
+    .select()
+    .from(technologies)
+    .where(eq(technologies.id, id))
+    .limit(1);
 
   if (!tech) {
     notFound();
@@ -53,13 +56,21 @@ export default async function TechnologyPage({
           </p>
         </div>
 
-        <Link
-          href={`/technology/${id}/new`}
-          className="flex items-center justify-center gap-2 rounded-md bg-[var(--text-primary)] px-4 py-2 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90 w-full md:w-auto"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Entry</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <ShareButton 
+            resourceType="technology"
+            resourceId={id}
+            isPublic={tech.isPublic}
+            currentSlug={tech.publicSlug}
+          />
+          <Link
+            href={`/technology/${id}/new`}
+            className="flex items-center justify-center gap-2 rounded-md bg-[var(--text-primary)] px-4 py-2 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90 w-full md:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Entry</span>
+          </Link>
+        </div>
       </header>
 
       {/* Entries Section */}
