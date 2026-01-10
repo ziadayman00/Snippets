@@ -26,8 +26,27 @@ export default async function ChangelogPage() {
                 <div className="relative">
                     <span className="absolute -left-[39px] top-1 h-5 w-5 rounded-full border-4 border-[var(--bg-primary)] bg-[var(--accent-primary)]" />
                     <div className="flex items-center gap-3 mb-2">
-                        <span className="text-sm font-medium text-[var(--text-muted)]">January 6, 2026</span>
+                        <span className="text-sm font-medium text-[var(--text-muted)]">January 11, 2026</span>
                         <span className="bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] text-xs font-bold px-2 py-0.5 rounded-full border border-[var(--accent-primary)]/20">
+                            v1.3.0
+                        </span>
+                    </div>
+                    <h2 className="text-2xl font-bold mb-4">Public Snippet Sharing</h2>
+                    <ul className="list-disc list-outside ml-4 space-y-2 text-[var(--text-secondary)]">
+                        <li>Share snippets publicly with beautiful, shareable links.</li>
+                        <li>Auto-generated Open Graph images for social media previews.</li>
+                        <li>View analytics with IP-based deduplication (24-hour window).</li>
+                        <li>Owner exclusion - your own views don't count.</li>
+                        <li>New homepage section showcasing the sharing feature.</li>
+                    </ul>
+                </div>
+
+                {/* Previous Release */}
+                <div className="relative">
+                    <span className="absolute -left-[39px] top-1 h-5 w-5 rounded-full border-4 border-[var(--bg-primary)] bg-[var(--text-muted)]" />
+                    <div className="flex items-center gap-3 mb-2">
+                        <span className="text-sm font-medium text-[var(--text-muted)]">January 6, 2026</span>
+                        <span className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-xs font-bold px-2 py-0.5 rounded-full border border-[var(--border-primary)]">
                             v1.2.0
                         </span>
                     </div>
@@ -40,7 +59,7 @@ export default async function ChangelogPage() {
                     </ul>
                 </div>
 
-                {/* Previous Release */}
+                {/* Older Release */}
                 <div className="relative">
                     <span className="absolute -left-[39px] top-1 h-5 w-5 rounded-full border-4 border-[var(--bg-primary)] bg-[var(--text-muted)]" />
                     <div className="flex items-center gap-3 mb-2">

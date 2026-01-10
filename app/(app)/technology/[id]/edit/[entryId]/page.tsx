@@ -68,6 +68,9 @@ export default async function EditEntryPage({
         incomingLinks={entry.incomingLinks}
         initialOutgoingLinks={entry.outgoingLinks}
         lastUpdated={entry.updatedAt}
+        isPublic={entry.isPublic}
+        slug={entry.slug}
+        views={entry.views}
       />
       <EditorTour />
     </div>

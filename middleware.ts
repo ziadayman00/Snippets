@@ -53,12 +53,13 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // If user is not signed in and trying to access protected route
-  // Allow access to "/", "/login", "/auth", "/api", and public pages
+  // Allow access to "/", "/login", "/auth", "/api", "/shared", and public pages
   if (
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/api") &&
+    !request.nextUrl.pathname.startsWith("/shared") &&
     !request.nextUrl.pathname.startsWith("/about") &&
     !request.nextUrl.pathname.startsWith("/docs") &&
     !request.nextUrl.pathname.startsWith("/pricing") &&

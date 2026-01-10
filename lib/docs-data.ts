@@ -143,5 +143,33 @@ export const DOCS_DATA: DocSection[] = [
               content: "Your questions and answers are saved locally, allowing you to easily revisit past insights without re-querying."
           }
       ]
+  },
+  {
+      id: "sharing",
+      title: "Public Sharing",
+      icon: Share2,
+      content: "Share your knowledge with the world through beautiful, public snippet links.",
+      subsections: [
+          {
+              id: "making-public",
+              title: "Publishing a Snippet",
+              content: "Open any snippet in the editor and click the 'Private' button in the header. It will change to 'Public' and generate a unique shareable link. Click 'Copy Link' to share it anywhere."
+          },
+          {
+              id: "social-previews",
+              title: "Social Media Previews",
+              content: "When you share a public link on Twitter, LinkedIn, or Slack, an auto-generated preview card appears with your snippet's title, technology, and code preview. No extra work required."
+          },
+          {
+              id: "view-analytics",
+              title: "View Analytics",
+              content: "Track how many people view your shared snippets. View counts appear next to the share button in the editor. We use IP-based deduplication (24-hour window) to ensure accurate metrics, and your own views don't count."
+          },
+          {
+              id: "privacy-control",
+              title: "Privacy Control",
+              content: "Toggle snippets between public and private anytime. Making a snippet private immediately removes it from public access while preserving the view count history."
+          }
+      ]
   }
 ];

@@ -30,7 +30,7 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-primary)] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-primary)]"></span>
             </span>
-            v1.2.0
+            v1.3.0
           </motion.div>
 
           <motion.h1 

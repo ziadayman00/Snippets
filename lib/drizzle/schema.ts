@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb, integer, vector, index, real } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, jsonb, integer, vector, index, real, boolean } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Technologies - Categories for snippets
@@ -33,6 +33,11 @@ export const entries = pgTable("entries", {
   repetitions: integer("repetitions").default(0).notNull(),
   interval: integer("interval").default(0).notNull(), // in days
   nextReviewDate: timestamp("next_review_date"), // null means new/not started
+  
+  // Public Sharing
+  isPublic: boolean("is_public").default(false).notNull(),
+  slug: text("slug").unique(), // Randomly generated public ID
+  views: integer("views").default(0).notNull(),
 }, (table) => ({
   userIdIdx: index("entries_user_id_idx").on(table.userId),
   createdAtIdx: index("entries_created_at_idx").on(table.createdAt),
@@ -66,6 +71,20 @@ export const snippetEmbeddings = pgTable("snippet_embeddings", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// Snippet Views - Track unique views for analytics
+export const snippetViews = pgTable("snippet_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  entryId: uuid("entry_id")
+    .notNull()
+    .references(() => entries.id, { onDelete: "cascade" }),
+  ipAddress: text("ip_address").notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+}, (table) => ({
+  entryIdIdx: index("snippet_views_entry_id_idx").on(table.entryId),
+  ipAddressIdx: index("snippet_views_ip_address_idx").on(table.ipAddress),
+  viewedAtIdx: index("snippet_views_viewed_at_idx").on(table.viewedAt),
+}));
 
 export const entriesRelations = relations(entries, ({ one, many }) => ({
   technology: one(technologies, {

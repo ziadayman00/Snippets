@@ -5,7 +5,8 @@ import { TiptapEditor } from "./tiptap-editor";
 import Link from "next/link";
 import { EditorGuide } from "./editor-guide";
 import { EditorTour } from "@/components/onboarding/editor-tour";
-import { Calendar, Link as LinkIcon, ArrowRightLeft, ChevronLeft, Save, Loader2, AlertCircle, Clock, Trash2, PanelRight, Check } from "lucide-react";
+import { ShareButton } from "./share-button";
+import { Calendar, Link as LinkIcon, ArrowRightLeft, ChevronLeft, Save, Loader2, AlertCircle, Clock, Trash2, PanelRight, Check, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { TagInput } from "@/components/tags/tag-input";
 import { autoSaveEntry, createEntry, deleteEntry } from "@/lib/actions/entry";
@@ -38,6 +39,9 @@ interface UnifiedEntryEditorProps {
     incomingLinks?: IncomingLink[];
     initialOutgoingLinks?: any[];
     lastUpdated?: Date;
+    isPublic?: boolean;
+    slug?: string | null;
+    views?: number;
 }
 
 export function UnifiedEntryEditor({ 
@@ -50,7 +54,10 @@ export function UnifiedEntryEditor({
     initialContent = "", 
     incomingLinks = [], 
     initialOutgoingLinks = [], 
-    lastUpdated: initialLastUpdated = new Date()
+    lastUpdated: initialLastUpdated = new Date(),
+    isPublic = false,
+    slug = null,
+    views = 0
 }: UnifiedEntryEditorProps) {
     const router = useRouter();
     
@@ -281,6 +288,21 @@ export function UnifiedEntryEditor({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 ml-2">
+                         {!isNew && entryId && (
+                             <>
+                                 <ShareButton 
+                                     entryId={entryId}
+                                     isPublic={isPublic}
+                                     currentSlug={slug}
+                                 />
+                                 {isPublic && views > 0 && (
+                                     <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-primary)] text-xs text-[var(--text-muted)]">
+                                         <Eye className="w-3.5 h-3.5" />
+                                         <span>{views} views</span>
+                                     </div>
+                                 )}
+                             </>
+                         )}
                          <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                             className={`p-2 rounded-md transition-colors lg:hidden ${isSidebarOpen ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:bg-[var(--bg-secondary)]'}`}
