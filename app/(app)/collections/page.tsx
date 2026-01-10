@@ -52,7 +52,7 @@ export default async function CollectionsPage() {
                 className="group relative flex flex-col rounded-xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-6 transition-all duration-200 hover:border-[var(--accent-primary)]/50 hover:shadow-lg hover:-translate-y-1"
               >
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-secondary)] group-hover:bg-[var(--accent-primary)]/10 group-hover:text-[var(--accent-primary)] transition-colors">
-                  <ListMusic className="h-5 w-5" />
+                  <Library className="h-5 w-5" />
                 </div>
                 <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
                   {collection.title}

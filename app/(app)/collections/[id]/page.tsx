@@ -1,11 +1,10 @@
 import { getCollection } from "@/lib/actions/collections";
 import { createClient } from "@/lib/supabase/server";
-import { Header } from "@/components/dashboard/header";
 import { redirect, notFound } from "next/navigation";
 import { EntryCard } from "@/components/dashboard/entry-card";
 import { AddEntryButton } from "@/components/collections/add-entry-button";
 import { SortableList } from "@/components/collections/sortable-list";
-import { ArrowLeft, BookOpen, GripVertical, ListMusic } from "lucide-react";
+import { ArrowLeft, BookOpen, GripVertical, Library } from "lucide-react";
 import Link from "next/link";
 
 export default async function CollectionDetailsPage({
@@ -31,7 +30,6 @@ export default async function CollectionDetailsPage({
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-primary)]">
-      <Header email={user.email} />
 
       <main className="flex-1 flex flex-col p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
         {/* Header */}
@@ -47,7 +45,7 @@ export default async function CollectionDetailsPage({
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                 <div className="flex gap-4">
                     <div className="flex-shrink-0 h-16 w-16 items-center justify-center rounded-xl bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] hidden sm:flex">
-                        <ListMusic className="h-8 w-8" />
+                        <Library className="h-8 w-8" />
                     </div>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
