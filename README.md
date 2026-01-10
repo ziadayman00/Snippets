@@ -9,36 +9,28 @@ A minimal, distraction-free web application for developers to store, organize, a
 ## ✨ Features
 
 ### 🎯 Core Functionality
-- **Technology-Based Organization**: Categorize snippets by programming language or technology
-- **Rich Text Editor**: Professional code editor powered by TipTap and CodeMirror 6
-- **Advanced Code Blocks**: VS Code-like editing experience with:
-  - Line numbers
-  - Syntax highlighting for 20+ languages
-  - Auto-indentation
-  - Bracket matching
-  - One Dark theme
-  - Copy to clipboard functionality
+- **Unified Entry Editor**: A powerful, distraction-free writing environment that combines Tiptap rich text with CodeMirror 6 code blocks.
+- **Smart Knowledge Graph**: Bi-directional linking between snippets (Mentions & Backlinks).
+- **Ask AI**: Natural language interface to query your entire knowledge base, providing synthesized answers with sources.
+
+### 📊 Dashboard & Analytics
+- **Activity Heatmap**: GitHub-style contribution graph to track your learning consistency.
+- **Interactive Onboarding**: Guided tours for new users to explain the Dashboard and Editor.
+- **Focus Mode**: Smart suggestions based on recently viewed and edited snippets.
 
 ### 🔐 Authentication & Security
-- **Magic Link Authentication**: Passwordless email-based login via Supabase
-- **Row Level Security (RLS)**: Database-level security ensuring users only access their own data
-- **Session Management**: Secure, persistent sessions with automatic refresh
+- **Magic Link Authentication**: Passwordless email-based login via Supabase.
+- **Row Level Security (RLS)**: Strict database-level isolation ensuring user data privacy.
 
 ### 📱 User Interface
-- **Responsive Design**: Fully optimized for mobile, tablet, and desktop
-- **Dark Theme**: Eye-friendly dark mode throughout the application
-- **Sticky Navigation**: Smooth, animated navbar with scroll detection
-- **Interactive Landing Page**: 
-  - Animated gradient background
-  - Before/After comparison demo
-  - FAQ accordion
-  - Feature showcase
+- **Responsive Design**: Mobile-first architecture with swipeable toolbars and overlay sidebars.
+- **Dark Theme**: Eye-friendly dark mode using Tailwind 4 CSS variables.
+- **Micro-Interactions**: Smooth animations using Framer Motion and Lucide icons.
 
 ### 🛠️ Developer Experience
-- **Full CRUD Operations**: Create, read, update, and delete entries and technologies
-- **Real-time Updates**: Instant UI updates after data mutations
-- **Type Safety**: Full TypeScript coverage
-- **Modern Stack**: Built with the latest Next.js App Router
+- **Full CRUD**: Robust server actions for detailed data management.
+- **Collections**: Curate snippets across different technologies into logical groups.
+- **Type Safety**: End-to-end TypeScript coverage from DB (Drizzle) to UI.
 
 ## 🚀 Tech Stack
 

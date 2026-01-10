@@ -32,20 +32,56 @@ export const DOCS_DATA: DocSection[] = [
     ]
   },
   {
+    id: "dashboard",
+    title: "Your Dashboard",
+    icon: Layout,
+    content: "Your command center. Get a bird’s-eye view of your learning progress.",
+    subsections: [
+        {
+            id: "activity-heatmap",
+            title: "Contribution Heatmap",
+            content: "Visualize your consistency over the last year. Every new snippet or edit lights up a square, motivating you to keep the streak alive."
+        },
+        {
+            id: "focus-library",
+            title: "Focus & Library",
+            content: "Jump back into 'Recent Activity' or browse your 'Library' of technologies. The dashboard intelligently surfaces what you use most."
+        }
+    ]
+  },
+  {
+      id: "collections",
+      title: "Collections",
+      icon: FileText,
+      content: "Group related snippets into curated lists for easy access or sharing.",
+      subsections: [
+          {
+              id: "creating-collections",
+              title: "Curate Your Knowledge",
+              content: "Create collections like 'React Best Practices' or 'Python Scripts'. Add snippets from any technology to build extensive guides."
+          }
+      ]
+  },
+  {
     id: "editor",
     title: "The Editor",
     icon: Code,
-    content: "Our editor is powered by CodeMirror 6 and Tiptap, giving you a best-in-class experience for both rich text and code.",
+    content: "Our unified editor combines valid markdown writing with a rich-text experience, complete with an intelligent sidekick.",
     subsections: [
         {
-            id: "markdown",
-            title: "Rich Text Support",
-            content: "Write freely with full markdown support. Use standard shortcuts like **Cmd+B** for bold, **#** for headings, and **-** for lists."
+            id: "clean-mode",
+            title: "Distraction-Free Writing",
+            content: "The editor is designed to keep you in flow. The sidebar tucks away, toolbar floats or sticks intelligently, and the interface adapts to mobile or desktop automatically."
         },
         {
             id: "code-blocks",
             title: "Smart Code Blocks",
-            content: "Type ``` to start a code block. The editor automatically detects the language (or you can set it manually) and applies syntax highlighting."
+            content: "Type ``` to start a code block. We use CodeMirror 6 under the hood, giving you VS Code-like power (syntax highlighting, bracket matching) right inside your notes."
+        },
+        {
+            id: "sidebar-tools",
+            title: "The Inspector Sidebar",
+            content: "Toggle the right sidebar to see metadata, incoming backlinks, and outlinks. It's your command center for connecting ideas."
         }
     ]
   },

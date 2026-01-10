@@ -1,4 +1,8 @@
-import { Zap, Database, Code2, Cpu, Network } from "lucide-react";
+"use client";
+
+import { Zap, Database, Code2, Cpu, Network, ArrowRight, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
 
 export function BentoGrid() {
   return (
@@ -13,99 +17,145 @@ export function BentoGrid() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
-        {/* Large Card: AI Intelligence (Spans 2 cols) */}
-        <div className="md:col-span-2 group relative overflow-hidden rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-8 hover:border-[var(--accent-primary)]/50 transition-colors">
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Zap className="w-48 h-48" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
+        
+        {/* Card 1: AI (Double Width) */}
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="md:col-span-2 group relative overflow-hidden rounded-3xl border border-white/5 bg-[#0F0F10] p-8 hover:border-[var(--accent-primary)]/50 transition-colors shadow-xl"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
+            <Zap className="w-64 h-64 rotate-12" />
           </div>
+          
           <div className="relative z-10 h-full flex flex-col justify-between">
-            <div>
-              <div className="inline-flex items-center rounded-full bg-[var(--accent-primary)]/10 px-3 py-1 text-xs font-medium text-[var(--accent-primary)] mb-4">
-                Now with Gemini 1.5
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 mb-4 border border-blue-500/20">
+                <Sparkles className="w-3 h-3" />
+                Gemini
               </div>
-              <h3 className="text-2xl font-bold mb-2">Talk to your code</h3>
-              <p className="text-[var(--text-muted)] max-w-sm">
-                RAG-powered chat that understands your specific context. Ask questions like "How do we handle auth?" and get cited answers.
+              <h3 className="text-2xl font-bold mb-3 text-white">Talk to your code</h3>
+              <p className="text-zinc-400 max-w-sm leading-relaxed">
+                RAG-powered chat that understands your specific context. Ask "How do I handle auth?" and get answers cited from your own snippets.
               </p>
             </div>
             
-            {/* Visual: Chat Bubble */}
-            <div className="mt-8 space-y-3">
+            {/* Visual: Chat UI */}
+            <div className="space-y-3 w-full max-w-md ml-auto">
               <div className="flex justify-end">
-                <div className="bg-[var(--accent-primary)] text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm max-w-[80%]">
-                  How do I fix the useEffect infinite loop?
+                <div className="bg-[#2A2A2A] text-zinc-100 px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm border border-white/10 shadow-sm">
+                  Why is the API route failing 403?
                 </div>
               </div>
               <div className="flex justify-start">
-                <div className="bg-[var(--bg-tertiary)] text-[var(--text-primary)] px-4 py-2 rounded-2xl rounded-tl-sm text-sm border border-[var(--border-primary)] max-w-[90%]">
-                  It looks like a stale closure. Add <code className="bg-[var(--bg-secondary)] px-1 rounded text-[var(--accent-primary)]">count</code> to the dependency array.
+                <div className="bg-blue-600 text-white px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm shadow-sm">
+                  It looks like <code className="bg-black/20 px-1 rounded font-mono text-xs">middleware.ts</code> is blocking the request.
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Tall Card: Knowledge Graph (Spans 1 col, 2 rows height-ish, but here just 1 row for now, maybe 2 if we want functionality) */}
-        <div className="md:col-span-1 group relative overflow-hidden rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-8 hover:border-[var(--accent-primary)]/50 transition-colors">
-           <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Network className="w-64 h-64" />
-          </div>
-          <div className="relative z-10 h-full flex flex-col justify-between">
-            <div>
-              <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4">
-                <Database className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Connect Everything</h3>
-              <p className="text-[var(--text-muted)] text-sm">
-                Don't just store notes. Link them. Create a web of knowledge with <code>@mention</code> linking.
-              </p>
+        {/* Card 2: Knowledge Graph (Single Width) */}
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="group relative overflow-hidden rounded-3xl border border-white/5 bg-[#0F0F10] p-8 hover:border-purple-500/50 transition-colors shadow-xl"
+        >
+          <div className="relative z-10 h-full flex flex-col">
+            <div className="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 border border-purple-500/20">
+              <Network className="w-6 h-6" />
             </div>
-            {/* Visual: Connection Nodes */}
-             <div className="mt-6 flex justify-center items-center h-32 relative">
-                {/* CSS Nodes */}
-                <div className="absolute w-3 h-3 bg-[var(--accent-primary)] rounded-full top-1/2 left-1/4 animate-pulse"></div>
-                <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-1/3 right-1/4 delay-75"></div>
-                <div className="absolute w-3 h-3 bg-blue-400 rounded-full bottom-1/4 left-1/2 delay-150"></div>
-                {/* Lines (SVG) */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30">
-                  <line x1="25%" y1="50%" x2="50%" y2="75%" stroke="currentColor" strokeWidth="1" />
-                  <line x1="50%" y1="75%" x2="75%" y2="33%" stroke="currentColor" strokeWidth="1" />
-                  <line x1="25%" y1="50%" x2="75%" y2="33%" stroke="currentColor" strokeWidth="1" />
-                </svg>
-             </div>
-          </div>
-        </div>
+            <h3 className="text-xl font-bold mb-2 text-white">Connect Everything</h3>
+            <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
+              Don't just store notes. Create a web of knowledge with <code>@mention</code> linking.
+            </p>
 
-        {/* Card: The Editor */}
-        <div className="md:col-span-1 group relative overflow-hidden rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-8 hover:border-[var(--accent-primary)]/50 transition-colors">
-          <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4">
+            {/* Visual: Mini Nodes */}
+            <div className="flex-1 min-h-[120px] relative">
+               <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative w-32 h-32">
+                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/50 z-10 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                     </div>
+                     <div className="absolute top-0 left-0 w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center animate-pulse">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                     </div>
+                     <div className="absolute bottom-2 right-0 w-6 h-6 rounded-full bg-pink-500/10 border border-pink-500/30 flex items-center justify-center animate-pulse delay-75">
+                        <div className="w-1.5 h-1.5 bg-pink-500 rounded-full" />
+                     </div>
+                     <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-white/10">
+                        <line x1="50%" y1="50%" x2="0%" y2="0%" />
+                        <line x1="50%" y1="50%" x2="100%" y2="90%" />
+                     </svg>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Card 3: Pro Editor (Single Width) */}
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="group relative overflow-hidden rounded-3xl border border-white/5 bg-[#0F0F10] p-8 hover:border-blue-500/50 transition-colors shadow-xl"
+        >
+          <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 border border-blue-500/20">
             <Code2 className="w-6 h-6" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Pro Code Editor</h3>
-          <p className="text-[var(--text-muted)] text-sm mb-4">
-            Powered by CodeMirror 6. Vim mode, multi-cursor, and syntax highlighting for 20+ languages.
+          <h3 className="text-xl font-bold mb-2 text-white">Pro Editor</h3>
+          <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
+            Vim mode, multi-cursor, and syntax highlighting for 20+ languages.
           </p>
-        </div>
+          
+          {/* Visual: Mini Editor Frame */}
+          <div className="bg-[#1A1A1A] rounded-lg border border-white/5 p-3 font-mono text-[10px] text-zinc-400 shadow-inner">
+             <div className="flex gap-1.5 mb-2 opacity-50">
+                <div className="w-2 h-2 rounded-full bg-red-500/50" />
+                <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
+                <div className="w-2 h-2 rounded-full bg-green-500/50" />
+             </div>
+             <div><span className="text-purple-400">def</span> <span className="text-yellow-200">hello</span>():</div>
+             <div className="pl-2 text-green-400">print("Hello World")</div>
+          </div>
+        </motion.div>
 
-        {/* Card: Performance/Vector */}
-        <div className="md:col-span-2 group relative overflow-hidden rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)]/30 p-8 hover:border-[var(--accent-primary)]/50 transition-colors flex items-center justify-between">
-          <div>
-            <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 mb-4">
-              <Cpu className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">vector-ready</h3>
-            <p className="text-[var(--text-muted)] text-sm max-w-md">
-              Your snippets are automatically embedded and stored in Supabase with pgvector for millisecond-fast semantic retrieval.
-            </p>
-          </div>
-           <div className="hidden md:block font-mono text-xs text-green-400 bg-black/20 p-4 rounded border border-green-500/20">
-              {">"} embedding.generate()<br/>
-              <span className="text-[var(--text-muted)]">... 1536 dimensions</span><br/>
-              {">"} vector.query(0.89)<br/>
-              <span className="text-[var(--text-muted)]">... 12ms latency</span>
-          </div>
-        </div>
+        {/* Card 4: Vector Performance (Double Width) */}
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="md:col-span-2 group relative overflow-hidden rounded-3xl border border-white/5 bg-[#0F0F10] p-8 hover:border-green-500/50 transition-colors shadow-xl flex flex-col md:flex-row items-center gap-8"
+        >
+           <div className="flex-1">
+             <div className="h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 mb-6 border border-green-500/20">
+               <Cpu className="w-6 h-6" />
+             </div>
+             <h3 className="text-xl font-bold mb-3 text-white">Vector-Ready Performance</h3>
+             <p className="text-zinc-400 max-w-md leading-relaxed">
+               Your snippets are automatically embedded and stored with pgvector for millisecond-fast semantic retrieval.
+             </p>
+           </div>
+           
+           {/* Visual: Terminal Block */}
+           <div className="w-full md:w-auto min-w-[300px]">
+              <div className="bg-[#050505] rounded-xl border border-white/10 p-4 font-mono text-xs shadow-2xl">
+                 <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2 text-zinc-500 text-[10px]">
+                    <span>TERMINAL</span>
+                    <span>BASH</span>
+                 </div>
+                 <div className="space-y-1">
+                     <div className="flex gap-2">
+                        <span className="text-green-500">➜</span>
+                        <span className="text-zinc-300">embedding.generate()</span>
+                     </div>
+                     <div className="pl-4 text-zinc-500">... 1536 dimensions generated</div>
+                     <div className="flex gap-2 mt-2">
+                        <span className="text-green-500">➜</span>
+                        <span className="text-zinc-300">vector.query(0.89)</span>
+                     </div>
+                     <div className="pl-4 text-emerald-400">✓ 12ms latency</div>
+                 </div>
+              </div>
+           </div>
+        </motion.div>
+
       </div>
     </section>
   );

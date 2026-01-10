@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
+import { FeaturesDropdown } from "./features-dropdown";
 
 interface StickyNavProps {
   isAuthenticated: boolean;
@@ -44,7 +45,7 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
       <div
         ref={navRef}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className={`container mx-auto px-6 transition-all duration-300 ease-in-out relative overflow-hidden ${
+        className={`container mx-auto px-6 transition-all duration-300 ease-in-out relative ${
           isScrolled
             ? "w-[calc(100%-1rem)] md:w-full max-w-5xl rounded-[24px] border border-[var(--border-primary)] bg-[var(--bg-primary)]/95 backdrop-blur-sm shadow-lg px-6 py-3 cursor-pointer md:cursor-default"
             : "border border-transparent"
@@ -65,7 +66,8 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
           </Link>
 
           {/* Navigation Links - Desktop */}
-          <div className="hidden md:flex items-center gap-8" onClick={(e) => e.stopPropagation()}>
+          <div className="hidden md:flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
+            <FeaturesDropdown />
             <Link
               href="/about"
               className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
@@ -90,14 +92,6 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
             >
               Changelog
             </Link>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              GitHub
-            </a>
           </div>
 
           {/* CTA */}
@@ -135,6 +129,30 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
             }`}
         >
              <div className="overflow-hidden flex flex-col gap-2">
+                <div className="py-2">
+                    <div className="text-[10px] uppercase font-bold text-[var(--accent-primary)] px-2 mb-2">Features</div>
+                    <Link
+                        href="/features/editor"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md pl-4"
+                    >
+                        Unified Editor
+                    </Link>
+                    <Link
+                        href="/features/knowledge-graph"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md pl-4"
+                    >
+                        Knowledge Graph
+                    </Link>
+                    <Link
+                        href="/features/ai"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md pl-4"
+                    >
+                        Ask AI
+                    </Link>
+                </div>
                 <Link
                     href="/about"
                     onClick={(e) => e.stopPropagation()}
@@ -163,15 +181,6 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
                     >
                     Changelog
                 </Link>
-                <a
-                    href="https://github.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
-                >
-                    GitHub
-                </a>
              </div>
         </div>
       </div>
