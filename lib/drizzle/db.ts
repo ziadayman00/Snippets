@@ -10,14 +10,23 @@ console.log("DB Client Config:", {
   ssl_mode: "require" 
 });
 
-// Configure connection pooling to prevent "Max client connections reached"
-// In development, Next.js hot reloads can create many connections
-export const client = postgres(connectionString, { 
+const globalForDb = globalThis as unknown as {
+  conn: ReturnType<typeof postgres> | undefined
+};
+
+// Disable SSL for local connections (localhost/127.0.0.1)
+// Cloud providers (Supabase/Neon) usually require SSL
+const isLocal = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
+
+const conn = globalForDb.conn ?? postgres(connectionString, { 
   prepare: false, 
-  ssl: "require",
-  max: 10, // Maximum number of connections in the pool
-  idle_timeout: 20, // Close idle connections after 20 seconds
-  connect_timeout: 10 // Connection timeout in seconds
+  ssl: isLocal ? false : "require", // Adaptive SSL
+  max: 10, 
+  idle_timeout: 20, 
+  connect_timeout: 10 
 });
 
+if (process.env.NODE_ENV !== "production") globalForDb.conn = conn;
+
+export const client = conn;
 export const db = drizzle(client, { schema });
