@@ -20,7 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { reorderCollection, removeFromCollection } from "@/lib/actions/collections";
-import { useState, useId } from "react";
+import { useState, useId, useEffect } from "react";
 
 // Helper to determine ID
 const getItemId = (item: any) =>
@@ -119,6 +119,10 @@ export function SortableList({
   items: any[];
 }) {
   const [items, setItems] = useState(initialItems);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   const id = useId(); 
   const sensors = useSensors(
     useSensor(PointerSensor),

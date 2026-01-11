@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle/db";
 import { entries, snippetLinks } from "@/lib/drizzle/schema";
-import { and, eq, ilike, ne } from "drizzle-orm";
+import { and, eq, ilike, ne, desc } from "drizzle-orm";
 
 export async function searchSnippets(query: string, excludeId?: string) {
   const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function searchSnippets(query: string, excludeId?: string) {
     return [];
   }
 
-  // Simple title search
+  // Simple title search with recency sort
   const results = await db
     .select({
       id: entries.id,
@@ -29,6 +29,7 @@ export async function searchSnippets(query: string, excludeId?: string) {
         excludeId ? ne(entries.id, excludeId) : undefined
       )
     )
+    .orderBy(desc(entries.updatedAt))
     .limit(5);
 
   return results;

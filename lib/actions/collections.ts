@@ -235,3 +235,53 @@ export async function getCollectionForLearning(id: string) {
 
   return collection;
 }
+
+export async function updateCollection(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const id = formData.get("id") as string;
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+
+  if (!id || !title) return { error: "Missing fields" };
+
+  try {
+    await db
+        .update(collections)
+        .set({ title, description, updatedAt: new Date() })
+        .where(and(eq(collections.id, id), eq(collections.userId, user.id)));
+
+    revalidatePath(`/collections/${id}`);
+    revalidatePath("/collections");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update collection", error);
+    return { error: "Failed to update collection" };
+  }
+}
+
+export async function deleteCollection(id: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  try {
+    // Check ownership
+    const collection = await db.query.collections.findFirst({
+        where: and(eq(collections.id, id), eq(collections.userId, user.id))
+    });
+
+    if (!collection) return { error: "Collection not found" };
+
+    // Delete collection (cascades to collectionEntries, but NOT entries)
+    await db.delete(collections).where(eq(collections.id, id));
+
+    revalidatePath("/collections");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete collection", error);
+    return { error: "Failed to delete collection" };
+  }
+}

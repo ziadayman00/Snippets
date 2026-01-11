@@ -128,3 +128,44 @@ export async function semanticSearch(
     return results;
   }
 }
+
+/**
+ * Fast keyword-only search for optimistic UI updates
+ */
+export async function keywordSearch(
+  query: string,
+  limit: number = 5,
+  technologyId?: string
+): Promise<SearchResult[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  if (!query || query.trim().length === 0) return [];
+
+  const results = await db
+    .select({
+      id: entries.id,
+      title: entries.title,
+      content: entries.content,
+      technologyId: entries.technologyId,
+      technologyName: technologies.name,
+      technologyIcon: technologies.icon,
+    })
+    .from(entries)
+    .innerJoin(technologies, eq(entries.technologyId, technologies.id))
+    .where(
+      and(
+        eq(entries.userId, user.id),
+        technologyId ? eq(entries.technologyId, technologyId) : undefined,
+        ilike(entries.title, `%${query}%`)
+      )
+    )
+    .orderBy(desc(entries.updatedAt))
+    .limit(limit);
+
+  return results;
+}

@@ -14,7 +14,7 @@ export function AddEntryButton({ collectionId }: { collectionId: string }) {
         className="flex items-center gap-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)]"
       >
         <Plus className="h-4 w-4" />
-        Add Snippet
+        <span className="hidden sm:inline">Add Snippet</span>
       </button>
       <AddEntryDialog collectionId={collectionId} open={open} onOpenChange={setOpen} />
     </>

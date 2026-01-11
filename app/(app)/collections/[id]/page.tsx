@@ -7,6 +7,7 @@ import { SortableList } from "@/components/collections/sortable-list";
 import { ArrowLeft, BookOpen, GripVertical, Library } from "lucide-react";
 import Link from "next/link";
 import { ShareButton } from "@/components/editor/share-button";
+import { CollectionOptions } from "@/components/collections/collection-options";
 
 export default async function CollectionDetailsPage({
   params,
@@ -58,20 +59,22 @@ export default async function CollectionDetailsPage({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+
+                <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
                      <ShareButton 
                         resourceType="collection"
                         resourceId={collection.id}
                         isPublic={collection.isPublic}
                         currentSlug={collection.publicSlug}
                      />
+                     <CollectionOptions collection={collection} />
                      <AddEntryButton collectionId={collection.id} />
                      <Link
                         href={`/collections/${collection.id}/learn`}
-                        className="flex items-center gap-2 rounded-lg bg-[var(--text-primary)] px-4 py-2 text-sm font-medium text-[var(--bg-primary)] transition-transform hover:scale-105"
+                        className="flex items-center gap-2 rounded-lg bg-[var(--text-primary)] px-3 py-2 sm:px-4 text-sm font-medium text-[var(--bg-primary)] transition-transform hover:scale-105"
                      >
                         <BookOpen className="h-4 w-4" />
-                        Start Learning
+                        <span>Start Learning</span>
                      </Link>
                 </div>
             </div>

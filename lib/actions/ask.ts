@@ -6,7 +6,7 @@ import { generateEmbedding, extractSearchableText } from "@/lib/ai/embeddings";
 import { db } from "@/lib/drizzle/db";
 import { entries, technologies, snippetEmbeddings } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
-import { sql, desc, eq } from "drizzle-orm";
+import { sql, desc, eq, and } from "drizzle-orm";
 
 interface RetrievedSnippet {
   id: string;
@@ -20,7 +20,7 @@ interface RetrievedSnippet {
  * Ask a question and get an answer based on your notes
  * Uses RAG: Retrieval-Augmented Generation
  */
-export async function askQuestion(question: string) {
+export async function askQuestion(question: string, contextEntryIds?: string[]) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -39,8 +39,31 @@ export async function askQuestion(question: string) {
     const questionEmbedding = await generateEmbedding(question);
     const embeddingVector = `[${questionEmbedding.join(',')}]`;
 
-    // Step 2: Retrieve top 5 most relevant snippets
-    const relevantSnippets = await db
+    // Step 2: Retrieve snippets
+    // If contextEntryIds provided, fetch them specifically + top K relevant others
+    
+    let relevantSnippets: any[] = [];
+    
+    // A. Fetch specifically mentioned snippets (High Priority)
+    if (contextEntryIds && contextEntryIds.length > 0) {
+        const specificSnippets = await db
+            .select({
+                id: entries.id,
+                title: entries.title,
+                content: entries.content,
+                technologyId: entries.technologyId,
+                technologyName: technologies.name,
+                similarity: sql<number>`1`, // Treat as 100% relevant
+            })
+            .from(entries)
+            .innerJoin(technologies, eq(entries.technologyId, technologies.id))
+            .where(and(eq(entries.userId, user.id), sql`${entries.id} IN ${contextEntryIds}`));
+            
+        relevantSnippets = [...specificSnippets];
+    }
+
+    // B. Semantic Search for others
+    const semanticSnippets = await db
       .select({
         id: entries.id,
         title: entries.title,
@@ -52,12 +75,24 @@ export async function askQuestion(question: string) {
       .from(entries)
       .innerJoin(technologies, eq(entries.technologyId, technologies.id))
       .innerJoin(snippetEmbeddings, eq(entries.id, snippetEmbeddings.entryId))
-      .where(eq(entries.userId, user.id))
+      .where(
+        and(
+            eq(entries.userId, user.id),
+            // Exclude already added snippets to avoid duplicates
+            contextEntryIds && contextEntryIds.length > 0 ? sql`${entries.id} NOT IN ${contextEntryIds}` : undefined
+        )
+      )
       .orderBy(desc(sql`1 - (${snippetEmbeddings.embedding} <=> ${embeddingVector}::vector)`))
-      .limit(5);
+      .limit(5); // Reduce limit since we might have specific context
 
-    // Step 3: Filter by similarity threshold (>0.6)
-    const filteredSnippets = relevantSnippets.filter(s => s.similarity > 0.6);
+    relevantSnippets = [...relevantSnippets, ...semanticSnippets];
+
+    // Step 3: Filter by similarity threshold (>0.6) for SEMANTIC results only?
+    // Specific snippets are always kept.
+    const filteredSnippets = relevantSnippets.filter(s => {
+        if (contextEntryIds?.includes(s.id)) return true; // Always keep mentioned
+        return s.similarity > 0.6;
+    });
 
     if (filteredSnippets.length === 0) {
       return {

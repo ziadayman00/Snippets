@@ -90,6 +90,7 @@ export function TiptapEditor({
   const [menuStyle, setMenuStyle] = useState<{ top: number; left: number } | null>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const searchParams = useSearchParams();
+  const searchDebounceRef = useRef<any>(null);
 
   // Toggle full screen
   const toggleFullScreen = (e?: React.MouseEvent) => {
@@ -138,9 +139,21 @@ export function TiptapEditor({
           class: 'bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded px-1 py-0.5 font-medium decoration-clone',
         },
         suggestion: {
-          items: async ({ query }) => {
-            // Fetchsnippets matching the query, excluding current entry
-            return await searchSnippets(query, currentEntryId);
+          items: ({ query }: { query: string }) => {
+            return new Promise<any[]>((resolve) => {
+              if (searchDebounceRef.current) {
+                clearTimeout(searchDebounceRef.current.timeout);
+                searchDebounceRef.current.resolve([]);
+              }
+
+              searchDebounceRef.current = {
+                resolve,
+                timeout: setTimeout(async () => {
+                  const results = await searchSnippets(query, currentEntryId);
+                  resolve(results);
+                }, 250),
+              };
+            });
           },
           render: () => {
              // ... existing render ...

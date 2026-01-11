@@ -2,12 +2,18 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Search, Loader2, FileText, Filter, X, Check } from "lucide-react";
-import { semanticSearch } from "@/lib/actions/search";
+import { semanticSearch, keywordSearch } from "@/lib/actions/search";
+
+// ... existing imports
 import { getTechnologies } from "@/lib/actions/technology";
 import Link from "next/link";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+
+// ... inside component
+
+// Imports were misplaced here. Removing redundant block.
 
 interface SearchResult {
   id: string;
@@ -50,12 +56,26 @@ export function SemanticSearchBar() {
   const performSearch = useCallback(async (searchQuery: string, techId?: string) => {
     setIsSearching(true);
     setSelectedIndex(-1);
+    
+    // Start fast keyword search immediately
+    const keywordPromise = keywordSearch(searchQuery, 5, techId);
+    
+    // Start semantic search
+    const semanticPromise = semanticSearch(searchQuery, 7, techId);
+    
     try {
-      const searchResults = await semanticSearch(searchQuery, 7, techId);
-      setResults(searchResults);
+      // Show keyword results as soon as they are ready
+      const keywordResults = await keywordPromise;
+      setResults(keywordResults);
+      
+      // Then wait for semantic results and update (usually better quality)
+      const semanticResults = await semanticPromise;
+      if (semanticResults && semanticResults.length > 0) {
+          setResults(semanticResults);
+      }
     } catch (error) {
-      console.error("Search failed:", error);
-      setResults([]);
+      console.error("Search logic failed:", error);
+      // Fallback is handled inside actions usually, but ensure we don't clear valid results if just semantic failed
     } finally {
       setIsSearching(false);
     }
