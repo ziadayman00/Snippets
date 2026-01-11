@@ -202,3 +202,28 @@ export async function autoSaveEntry(id: string, technologyId: string, title: str
         return { success: false };
     }
 }
+
+export async function toggleEntryPin(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  const id = formData.get("id") as string;
+  const isPinned = formData.get("isPinned") === "true";
+  const technologyId = formData.get("technologyId") as string;
+
+  try {
+    await db.update(entries)
+      .set({ isPinned: !isPinned })
+      .where(eq(entries.id, id));
+      
+    revalidatePath(`/technology/${technologyId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to toggle pin:", error);
+    return { success: false, error: "Failed to toggle pin" };
+  }
+}

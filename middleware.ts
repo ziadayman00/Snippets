@@ -60,6 +60,7 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/api") &&
     !request.nextUrl.pathname.startsWith("/shared") &&
+    !request.nextUrl.pathname.startsWith("/api") &&
     !request.nextUrl.pathname.startsWith("/about") &&
     !request.nextUrl.pathname.startsWith("/docs") &&
     !request.nextUrl.pathname.startsWith("/pricing") &&

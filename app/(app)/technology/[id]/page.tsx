@@ -39,7 +39,7 @@ export default async function TechnologyPage({
     .select()
     .from(entries)
     .where(eq(entries.technologyId, id))
-    .orderBy(desc(entries.createdAt));
+    .orderBy(desc(entries.isPinned), desc(entries.createdAt));
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] p-6 md:p-10 space-y-8 max-w-6xl mx-auto">

@@ -1,6 +1,13 @@
 import { pgTable, text, timestamp, uuid, jsonb, integer, vector, index, real, boolean } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().notNull(), // Matching auth.users.id
+  email: text("email").notNull(),
+  role: text("role", { enum: ["user", "admin"] }).default("user").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Technologies - Categories for snippets
 export const technologies = pgTable("technologies", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
@@ -8,7 +15,7 @@ export const technologies = pgTable("technologies", {
   // Simple slug for URL if needed, or just display name
   slug: text("slug").notNull(),
   icon: text("icon"), // Can store icon name or SVG path
-  userId: uuid("user_id").notNull(), // Managed by Supabase Auth
+  userId: uuid("user_id").notNull(), // Managed by Supabase Auth (now references public.users ideally, but keeping loose for auth simplicity)
   createdAt: timestamp("created_at").defaultNow().notNull(),
   // Public sharing fields
   isPublic: boolean("is_public").default(false).notNull(),
@@ -42,6 +49,7 @@ export const entries = pgTable("entries", {
   isPublic: boolean("is_public").default(false).notNull(),
   slug: text("slug").unique(), // Randomly generated public ID
   views: integer("views").default(0).notNull(),
+  isPinned: boolean("is_pinned").default(false).notNull(),
 }, (table) => ({
   userIdIdx: index("entries_user_id_idx").on(table.userId),
   createdAtIdx: index("entries_created_at_idx").on(table.createdAt),

@@ -4,6 +4,8 @@ import { createTechnology } from "@/lib/actions/technology";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Loader2, X } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function CreateTechDialog({
   open,
@@ -14,6 +16,7 @@ export function CreateTechDialog({
 }) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,9 +31,10 @@ export function CreateTechDialog({
     if (result.success) {
       setName("");
       onOpenChange(false);
+      router.refresh(); 
+      toast.success("Technology created successfully");
     } else {
-      // Handle error (alert for now)
-      alert(result.error);
+      toast.error(result.error || "Failed to create technology");
     }
   };
 
