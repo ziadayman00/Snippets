@@ -57,13 +57,13 @@ export default async function PublicCollectionPage({
                 <Library className="h-8 w-8" />
             </div>
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] break-words">
                     {collection.title}
                 </h1>
-                <p className="text-[var(--text-secondary)] mt-2 max-w-xl text-lg relative leading-relaxed">
+                <p className="text-[var(--text-secondary)] mt-2 max-w-xl text-base sm:text-lg relative leading-relaxed">
                     {collection.description}
                 </p>
-                <div className="flex items-center gap-4 mt-4 text-sm text-[var(--text-muted)]">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-xs sm:text-sm text-[var(--text-muted)]">
                     <span className="flex items-center gap-1.5">
                         <BookOpen className="w-4 h-4" />
                         {collection.entries.length} items

@@ -52,7 +52,7 @@ export default async function PublicTechnologyPage({
                 <span>/</span>
                 <span>Technology</span>
             </div>
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] break-words">
             {tech.icon && <span className="mr-2">{tech.icon}</span>}
             {tech.name}
           </h1>

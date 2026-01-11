@@ -99,7 +99,7 @@ export default async function PublicSnippetPage({ params }: { params: Promise<{ 
       <main className="container mx-auto px-6 py-12 max-w-4xl">
         {/* Meta Info */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs sm:text-sm text-[var(--text-muted)] mb-3 relative z-10">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-primary)]">
               <Tag className="w-3.5 h-3.5" />
               <span>{snippet.technologyName}</span>
@@ -114,7 +114,7 @@ export default async function PublicSnippetPage({ params }: { params: Promise<{ 
             </div>
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-2">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-2 break-words">
             {snippet.title}
           </h1>
         </div>
