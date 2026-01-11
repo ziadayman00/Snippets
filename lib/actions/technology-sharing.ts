@@ -139,6 +139,7 @@ export async function getPublicTechnology(slug: string, ipAddress?: string) {
         isPublic: entries.isPublic,
         slug: entries.slug,
         views: entries.views,
+        isPinned: entries.isPinned,
       })
       .from(entries)
       .where(and(
