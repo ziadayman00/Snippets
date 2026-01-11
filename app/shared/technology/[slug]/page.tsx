@@ -52,11 +52,11 @@ export default async function PublicTechnologyPage({
                 <span>/</span>
                 <span>Technology</span>
             </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] break-words">
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
             {tech.icon && <span className="mr-2">{tech.icon}</span>}
             {tech.name}
           </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-[var(--text-muted)] mt-1 truncate">
             {tech.snippets?.length || 0} public entries • {tech.views} views
           </p>
         </div>

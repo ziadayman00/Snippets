@@ -57,20 +57,23 @@ export default async function PublicCollectionPage({
                 <Library className="h-8 w-8" />
             </div>
             <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] break-words">
+                <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
                     {collection.title}
                 </h1>
-                <p className="text-[var(--text-secondary)] mt-2 max-w-xl text-base sm:text-lg relative leading-relaxed">
+                <p className="text-[var(--text-secondary)] mt-2 max-w-xl text-lg relative leading-relaxed">
                     {collection.description}
                 </p>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-xs sm:text-sm text-[var(--text-muted)]">
-                    <span className="flex items-center gap-1.5">
+                <div className="flex items-center gap-4 mt-4 text-sm text-[var(--text-muted)] overflow-hidden">
+                    <span className="flex items-center gap-1.5 flex-shrink-0">
                         <BookOpen className="w-4 h-4" />
-                        {collection.entries.length} items
+                        {collection.entries.length} <span className="hidden sm:inline">items</span>
                     </span>
-                    <span className="flex items-center gap-1.5">
-                        <Clock className="w-4 h-4" />
-                        Updated {new Date(collection.updatedAt).toLocaleDateString()}
+                    <span className="flex items-center gap-1.5 flex-shrink-0 truncate">
+                        <Clock className="w-4 h-4 flex-shrink-0" />
+                        <span>
+                            <span className="hidden sm:inline">Updated </span>
+                            {new Date(collection.updatedAt).toLocaleDateString()}
+                        </span>
                     </span>
                 </div>
             </div>

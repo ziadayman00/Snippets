@@ -99,22 +99,26 @@ export default async function PublicSnippetPage({ params }: { params: Promise<{ 
       <main className="container mx-auto px-6 py-12 max-w-4xl">
         {/* Meta Info */}
         <div className="mb-8">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs sm:text-sm text-[var(--text-muted)] mb-3 relative z-10">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-primary)]">
-              <Tag className="w-3.5 h-3.5" />
-              <span>{snippet.technologyName}</span>
+          <div className="flex items-center gap-3 text-sm text-[var(--text-muted)] mb-3 overflow-hidden">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-primary)] flex-shrink-0 max-w-[120px] sm:max-w-none">
+              <Tag className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">{snippet.technologyName}</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <Eye className="w-3.5 h-3.5" />
-              <span>{snippet.views} views</span>
+              <span>{snippet.views}</span>
+              <span className="hidden sm:inline"> views</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Updated {formatDistanceToNow(new Date(snippet.updatedAt))} ago</span>
+            <div className="flex items-center gap-1.5 flex-shrink-0 truncate">
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">
+                <span className="hidden sm:inline">Updated </span>
+                {formatDistanceToNow(new Date(snippet.updatedAt), { addSuffix: true })}
+              </span>
             </div>
           </div>
           
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-2 break-words">
+          <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-2">
             {snippet.title}
           </h1>
         </div>
