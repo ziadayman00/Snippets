@@ -5,7 +5,6 @@ import { technologies, entries, resourceViews } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { randomBytes } from "crypto";
 
 /**
  * Generate a URL-safe slug for public sharing
@@ -17,7 +16,8 @@ function generatePublicSlug(name: string): string {
     .replace(/^-+|-+$/g, "")
     .substring(0, 30);
   
-  const randomSuffix = randomBytes(4).toString("hex");
+  // Use Math.random for Edge compatibility (instead of crypto.randomBytes)
+  const randomSuffix = Math.random().toString(16).substring(2, 10);
   return `${sanitized}-${randomSuffix}`;
 }
 

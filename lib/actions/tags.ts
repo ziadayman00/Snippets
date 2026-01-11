@@ -157,6 +157,7 @@ export async function getTagWithEntries(slug: string) {
             createdAt: entries.createdAt,
             updatedAt: entries.updatedAt,
             lastViewedAt: entries.lastViewedAt,
+            isPinned: entries.isPinned,
             technologyName: technologies.name, // Join technology name
         })
         .from(entryTags)
