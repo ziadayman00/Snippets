@@ -22,7 +22,7 @@ export default async function Home() {
 
       <main className="flex-1">
         <HeroSection isAuthenticated={!!user} />
-        <BrandWall />
+        {/* <BrandWall /> */}
         <BentoGrid />
         <SharingShowcase />
         <FeatureList />
