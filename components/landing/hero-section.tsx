@@ -9,8 +9,9 @@ import { motion } from "motion/react";
 export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
     <section className="relative overflow-hidden pt-24 pb-32 md:pt-32 md:pb-48">
-      {/* Background Gradients */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[var(--accent-primary)]/10 blur-[120px] rounded-full pointer-events-none" />
+      {/* Background Gradients & Spotlight */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[var(--accent-primary)]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-noise opacity-20 pointer-events-none mix-blend-overlay"></div>
       
       {/* Neural Network Overlay */}
       <div className="absolute inset-0 z-0">
@@ -24,13 +25,14 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)]/50 backdrop-blur-sm px-3 py-1 text-xs font-medium text-[var(--accent-primary)] mb-8"
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)]/50 backdrop-blur-md px-3 py-1 text-xs font-medium text-[var(--accent-primary)] mb-8 overflow-hidden relative"
           >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--text-primary)]/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-primary)] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-primary)]"></span>
             </span>
-            v1.3.0
+            <span className="relative">v1.3.0</span>
           </motion.div>
 
           <motion.h1 
@@ -85,7 +87,10 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
             <div className="absolute -inset-4 bg-black/40 blur-3xl -z-10 rounded-[32px]" />
             
             {/* Desktop & Mobile Unified Version */}
-            <div className="relative rounded-xl border border-white/10 bg-[#0A0A0A] shadow-[0_0_50px_-12px_rgba(0,0,0,0.8)] overflow-hidden aspect-[7/8] md:aspect-[16/9] flex flex-col ring-1 ring-white/5">
+            <div className="relative rounded-xl border border-[var(--border-primary)] bg-[#0A0A0A]/90 backdrop-blur-xl shadow-[0_0_80px_-20px_rgba(var(--accent-primary-rgb),0.3)] overflow-hidden aspect-[7/8] md:aspect-[16/9] flex flex-col ring-1 ring-white/10 group">
+              
+              {/* Glass Reflection */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
             
             {/* Title Input Area */}
             <div className="px-4 md:px-6 py-3 md:py-4 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">

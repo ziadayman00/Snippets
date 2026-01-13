@@ -1,12 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { StickyNav } from "@/components/landing/sticky-nav";
 import { HeroSection } from "@/components/landing/hero-section";
+import { BrandWall } from "@/components/landing/brand-wall";
 import { BentoGrid } from "@/components/landing/bento-grid";
 import { SharingShowcase } from "@/components/landing/sharing-showcase";
 import { FeatureList } from "@/components/landing/feature-list";
 import { ComparisonSection } from "@/components/landing/comparison-section";
 import { FAQSection } from "@/components/landing/faq-section";
-import { CTASection } from "@/components/landing/cta-section";
+
 import { Footer } from "@/components/landing/footer";
 
 export default async function Home() {
@@ -21,12 +22,12 @@ export default async function Home() {
 
       <main className="flex-1">
         <HeroSection isAuthenticated={!!user} />
+        <BrandWall />
         <BentoGrid />
         <SharingShowcase />
         <FeatureList />
         <ComparisonSection />
         <FAQSection />
-        <CTASection isAuthenticated={!!user} />
       </main>
 
       <Footer />
