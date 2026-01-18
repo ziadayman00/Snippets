@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 interface ConditionalNavbarProps {
   user: User;
@@ -13,9 +14,27 @@ interface ConditionalNavbarProps {
 export function ConditionalNavbar({ user, onSignOut }: ConditionalNavbarProps) {
   const pathname = usePathname();
   const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; href?: string }[]>([]);
+  const [userRole, setUserRole] = useState<string | null>(null);
   
   // Hide navbar on editor pages
   const isEditorPage = pathname.includes("/edit/") || pathname.endsWith("/new");
+  
+  // Fetch user role
+  useEffect(() => {
+    async function fetchUserRole() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      
+      if (data && !error) {
+        setUserRole(data.role);
+      }
+    }
+    fetchUserRole();
+  }, [user.id, pathname]); // Re-fetch when pathname changes (after redirect from Stripe)
   
   useEffect(() => {
     // Generate breadcrumbs based on pathname
@@ -64,5 +83,5 @@ export function ConditionalNavbar({ user, onSignOut }: ConditionalNavbarProps) {
     return null;
   }
   
-  return <Navbar user={user} onSignOut={onSignOut} breadcrumbs={breadcrumbs} />;
+  return <Navbar user={user} userRole={userRole || undefined} onSignOut={onSignOut} breadcrumbs={breadcrumbs} />;
 }

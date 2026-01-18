@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/drizzle/db";
-import { entries, technologies } from "@/lib/drizzle/schema";
+import { entries, technologies, users } from "@/lib/drizzle/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
 
 // Components
@@ -17,11 +17,16 @@ import { StatsOverview } from "@/components/dashboard/stats-overview";
 import { ActivityHeatmap } from "@/components/dashboard/activity-heatmap";
 import { SemanticSearchBar } from "@/components/search/semantic-search-bar";
 import { Sparkles, Library as LibraryIcon } from "lucide-react";
+import { UpgradeSuccessToast } from "@/components/upgrade/upgrade-success-toast";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { AISuggestions } from "@/components/dashboard/ai-suggestions";
 
 // Actions
 import { getReviewCount } from "@/lib/actions/review";
 import { getStats } from "@/lib/actions/stats";
 import { searchTechnologies } from "@/lib/actions/technology";
+import { getUsageStats } from "@/lib/limits";
+import { UsageProgress } from "@/components/upgrade/usage-progress";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -33,14 +38,24 @@ export default async function Dashboard() {
     redirect("/login");
   }
 
+  // Get user role
+  const [userRecord] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1);
+
+  const isPro = userRecord?.role === "pro";
+
   // Fetch Data Parallel with error handling
   let reviewCount = 0;
   let stats: any = { totalSnippets: 0, mostActiveTech: "None", streak: 0, heatmapData: [] };
   let recentEntriesRaw: any[] = [];
   let userTechnologies: any[] = [];
+  let usageStats: any = null;
 
   try {
-    [reviewCount, stats, recentEntriesRaw, userTechnologies] = await Promise.all([
+    [reviewCount, stats, recentEntriesRaw, userTechnologies, usageStats] = await Promise.all([
       getReviewCount().catch(err => {
         console.error("getReviewCount failed:", err);
         return 0;
@@ -69,6 +84,10 @@ export default async function Dashboard() {
       searchTechnologies("").catch(err => {
         console.error("searchTechnologies failed:", err);
         return [];
+      }),
+      getUsageStats().catch(err => {
+        console.error("getUsageStats failed:", err);
+        return null;
       })
     ]);
   } catch (error) {
@@ -136,7 +155,24 @@ export default async function Dashboard() {
          <SemanticSearchBar />
       </div>
 
-      {/* 4. Main Content Stream */}
+      {/* 4. AI Suggestions */}
+      <AISuggestions />
+
+      {/* Check if user has any snippets */}
+      {formattedRecent.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <>
+          {/* 5. Usage Progress (Free users only) */}
+          {!isPro && usageStats && (
+            <UsageProgress
+              snippets={usageStats.snippets}
+              technologies={usageStats.technologies}
+              aiQueries={usageStats.aiQueries}
+            />
+          )}
+
+          {/* 6. Main Content Stream */}
       <div className="space-y-12">
           
           {/* Recent Activity (List View) */}
@@ -148,9 +184,16 @@ export default async function Dashboard() {
           {/* Activity Heatmap */}
           <ActivityHeatmap data={stats.heatmapData} />
       </div>
+        </>
+      )}
 
        {/* Tour */}
        <DashboardTour />
+       
+       {/* Success Toast */}
+       <Suspense fallback={null}>
+         <UpgradeSuccessToast />
+       </Suspense>
     </div>
   );
 }

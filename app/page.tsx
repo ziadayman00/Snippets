@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { StickyNav } from "@/components/landing/sticky-nav";
 import { HeroSection } from "@/components/landing/hero-section";
-import { BrandWall } from "@/components/landing/brand-wall";
+import { SocialProof } from "@/components/landing/social-proof";
+import { ProductDemo } from "@/components/landing/product-demo";
 import { BentoGrid } from "@/components/landing/bento-grid";
-import { SharingShowcase } from "@/components/landing/sharing-showcase";
-import { FeatureList } from "@/components/landing/feature-list";
-import { ComparisonSection } from "@/components/landing/comparison-section";
-import { FAQSection } from "@/components/landing/faq-section";
-
+import { PricingPreview } from "@/components/landing/pricing-preview";
+import { FinalCTA } from "@/components/landing/final-cta";
 import { Footer } from "@/components/landing/footer";
+import { SharingShowcase } from "@/components/landing/sharing-showcase";
+import { ChaosToClarity } from "@/components/landing/feature-chaos-clarity";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -17,17 +17,18 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]">
+    <div className="flex min-h-screen flex-col bg-[#0a0a0a] text-white">
       <StickyNav isAuthenticated={!!user} />
 
       <main className="flex-1">
         <HeroSection isAuthenticated={!!user} />
-        {/* <BrandWall /> */}
-        <BentoGrid />
+        <SocialProof />
+        <ProductDemo />
         <SharingShowcase />
-        <FeatureList />
-        <ComparisonSection />
-        <FAQSection />
+        <ChaosToClarity />
+        <BentoGrid />
+        <PricingPreview />
+        <FinalCTA />
       </main>
 
       <Footer />

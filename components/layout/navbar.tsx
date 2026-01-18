@@ -2,21 +2,24 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { CreateTechDialog } from "@/components/dashboard/create-tech-dialog";
+import { ManageSubscriptionButton } from "@/components/upgrade/manage-subscription-button";
 
 interface NavbarProps {
   user: User;
+  userRole?: string;
   onSignOut: () => Promise<void>;
   breadcrumbs?: { label: string; href?: string }[];
 }
 
-export function Navbar({ user, onSignOut, breadcrumbs }: NavbarProps) {
+export function Navbar({ user, userRole, onSignOut, breadcrumbs }: NavbarProps) {
   const [createTechOpen, setCreateTechOpen] = useState(false);
   const pathname = usePathname();
+  const isFreeUser = !userRole || userRole === "user";
 
   return (
     <>
@@ -52,7 +55,7 @@ export function Navbar({ user, onSignOut, breadcrumbs }: NavbarProps) {
             ))}
           </div>
 
-          {/* Right: Create + Logout */}
+          {/* Right: Create + Upgrade (free only) / Pro badge + Logout */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setCreateTechOpen(true)}
@@ -61,6 +64,20 @@ export function Navbar({ user, onSignOut, breadcrumbs }: NavbarProps) {
               <Plus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Create</span>
             </button>
+            
+            {/* Show Upgrade button for free users, Pro badge for Pro users */}
+            {isFreeUser ? (
+              <Link
+                href="/pricing"
+                className="flex items-center gap-1.5 rounded-md border border-[var(--border-primary)] bg-[var(--bg-secondary)] px-2 sm:px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Upgrade</span>
+              </Link>
+            ) : (
+              <ManageSubscriptionButton />
+            )}
+            
             <button
               onClick={onSignOut}
               className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors hidden sm:inline"

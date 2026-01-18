@@ -7,6 +7,7 @@ import { db } from "@/lib/drizzle/db";
 import { entries, technologies, snippetEmbeddings } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
 import { sql, desc, eq, and } from "drizzle-orm";
+import { checkLimit } from "@/lib/limits";
 
 interface RetrievedSnippet {
   id: string;
@@ -28,6 +29,12 @@ export async function askQuestion(question: string, contextEntryIds?: string[]) 
 
   if (!user) {
     throw new Error("Unauthorized");
+  }
+
+  // Check AI query limit before processing
+  const limitCheck = await checkLimit("aiQueries");
+  if (!limitCheck.allowed) {
+    throw new Error("LIMIT_REACHED");
   }
 
   if (!question || question.trim().length === 0) {

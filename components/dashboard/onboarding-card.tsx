@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createSampleData } from "@/lib/actions/onboarding";
+import { createSampleSnippets } from "@/lib/actions/onboarding";
 import { Loader2, Plus, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -12,7 +12,7 @@ export function OnboardingCard() {
   const handleCreateSample = async () => {
     setIsLoading(true);
     try {
-      await createSampleData();
+      await createSampleSnippets();
       router.refresh();
     } catch (error) {
       console.error("Failed to create sample data", error);

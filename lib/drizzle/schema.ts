@@ -4,7 +4,9 @@ import { relations } from "drizzle-orm";
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().notNull(), // Matching auth.users.id
   email: text("email").notNull(),
-  role: text("role", { enum: ["user", "admin"] }).default("user").notNull(),
+  role: text("role", { enum: ["user", "pro", "admin"] }).default("user").notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

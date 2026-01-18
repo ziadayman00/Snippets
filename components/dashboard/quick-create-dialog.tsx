@@ -5,6 +5,7 @@ import { Plus, X } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
 import { createEntry } from "@/lib/actions/entry";
+import { UpgradeModal } from "@/components/upgrade/limit-modal";
 
 interface QuickCreateDialogProps {
   technologies: { id: string; name: string; icon: string | null }[];
@@ -13,6 +14,7 @@ interface QuickCreateDialogProps {
 export function QuickCreateDialog({ technologies }: QuickCreateDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
@@ -27,13 +29,19 @@ export function QuickCreateDialog({ technologies }: QuickCreateDialogProps) {
       setOpen(false);
     } catch (error) {
       console.error("Failed to create entry:", error);
-      alert("Failed to create entry");
+      if (error instanceof Error && error.message === "LIMIT_REACHED") {
+        setOpen(false);
+        setShowUpgradeModal(true);
+      } else {
+        alert("Failed to create entry");
+      }
     } finally {
       setLoading(false);
     }
   }
 
   return (
+    <>
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <button className="flex items-center gap-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-primary)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-colors">
@@ -105,5 +113,15 @@ export function QuickCreateDialog({ technologies }: QuickCreateDialogProps) {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+
+    {/* Upgrade Modal */}
+    <UpgradeModal
+      open={showUpgradeModal}
+      onOpenChange={setShowUpgradeModal}
+      limitType="snippets"
+      current={50}
+      limit={50}
+    />
+  </>
   );
 }

@@ -5,6 +5,7 @@ import { technologies, entries } from "@/lib/drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
 import { eq, and, ilike, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { checkLimit } from "@/lib/limits";
 
 export async function createTechnology(formData: FormData) {
   const supabase = await createClient();
@@ -14,6 +15,12 @@ export async function createTechnology(formData: FormData) {
 
   if (!user) {
     return { error: "Unauthorized" };
+  }
+
+  // Check technology limit before creating
+  const limitCheck = await checkLimit("technologies");
+  if (!limitCheck.allowed) {
+    return { error: "LIMIT_REACHED" };
   }
 
   const name = formData.get("name") as string;

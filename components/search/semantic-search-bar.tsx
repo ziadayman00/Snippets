@@ -135,15 +135,30 @@ export function SemanticSearchBar() {
     <div className="relative w-full max-w-md" ref={menuRef}>
       <div className="relative group">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-primary)] transition-colors" />
+        
+        {/* Smart Search Badge */}
+        <div className="absolute left-10 top-1/2 -translate-y-1/2 flex items-center gap-1.5 group/smart">
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-primary)]/10 text-[10px] font-semibold text-[var(--accent-primary)] border border-[var(--accent-primary)]/20">
+            <span>⚡</span>
+            <span className="hidden sm:inline">Smart</span>
+          </span>
+          
+          {/* Tooltip */}
+          <div className="absolute left-0 top-full mt-2 w-52 p-2 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] shadow-xl opacity-0 invisible group-hover/smart:opacity-100 group-hover/smart:visible transition-all duration-200 z-[100]">
+            <p className="text-xs text-[var(--text-muted)] mb-1">Semantic search</p>
+            <p className="text-xs text-[var(--text-primary)] font-medium">Finds snippets by meaning, not just keywords</p>
+          </div>
+        </div>
+        
         <input
           type="text"
-          placeholder="Search snippets by concept... (BETA)"
+          placeholder="Search snippets by concept..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query && setIsOpen(true)}
           onKeyDown={handleKeyDown}
           className={cn(
-            "w-full rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] py-2 pl-10 pr-20 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] transition-all shadow-sm",
+            "w-full rounded-lg border border-[var(--border-primary)] bg-[var(--bg-secondary)] py-2 pl-24 sm:pl-28 pr-20 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] transition-all shadow-sm",
             showFilters && "rounded-b-none border-b-transparent"
           )}
         />

@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { syncSnippetLinks } from "@/lib/actions/links";
 import { upsertEmbedding } from "@/lib/actions/embeddings";
 import { updateEntryTags } from "@/lib/actions/tags";
+import { checkLimit } from "@/lib/limits";
 
 export async function createEntry(formData: FormData) {
   const supabase = await createClient();
@@ -19,6 +20,12 @@ export async function createEntry(formData: FormData) {
 
   if (!user) {
     throw new Error("Unauthorized");
+  }
+
+  // Check snippet limit before creating
+  const limitCheck = await checkLimit("snippets");
+  if (!limitCheck.allowed) {
+    throw new Error("LIMIT_REACHED");
   }
 
   const title = formData.get("title") as string;

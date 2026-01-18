@@ -45,10 +45,10 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
       <div
         ref={navRef}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className={`container mx-auto px-4 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] relative ${
+        className={`container mx-auto transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] relative ${
           isScrolled
-            ? "w-[calc(100%-2rem)] md:w-full max-w-4xl rounded-[32px] border border-[var(--border-primary)]/50 bg-[#0A0A0A]/80 backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3)] px-6 py-2.5 cursor-pointer md:cursor-default"
-            : "border border-transparent"
+            ? "w-[calc(100%-2rem)] md:w-full max-w-5xl rounded-full border border-white/10 bg-black/60 backdrop-blur-md shadow-[0_8px_40px_-12px_rgba(0,0,0,0.3)] px-6 py-3 cursor-pointer md:cursor-default"
+            : "px-4 border border-transparent"
         } ${isMobileMenuOpen && isScrolled ? "!rounded-[24px] !bg-[#0A0A0A] !py-6" : ""}`} 
       >
         <div className="flex items-center justify-between relative z-10">
@@ -61,7 +61,7 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
             <img 
               src="/logo.svg" 
               alt="Snippets" 
-              className="h-6 w-auto"
+              className="h-7 w-auto"
             />
           </Link>
 
@@ -69,34 +69,28 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
           <div className="hidden md:flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             <FeaturesDropdown />
             <Link
-              href="/about"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-full hover:bg-white/5"
-            >
-              About
-            </Link>
-            <Link
               href="/pricing"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-full hover:bg-white/5"
+              className="text-sm font-medium text-zinc-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/5"
             >
               Pricing
             </Link>
             <Link
               href="/docs"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-full hover:bg-white/5"
+              className="text-sm font-medium text-zinc-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/5"
             >
               Docs
             </Link>
             <Link
-              href="/changelog"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-full hover:bg-white/5"
+              href="/about"
+              className="text-sm font-medium text-zinc-400 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/5"
             >
-              Changelog
+              About
             </Link>
           </div>
 
           <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
              {/* Separator */}
-            <div className={`hidden md:block h-6 w-px bg-[var(--border-primary)]/50 transition-opacity ${isScrolled ? 'opacity-100' : 'opacity-0'}`} />
+            <div className={`hidden md:block h-5 w-px bg-white/10 transition-opacity ${isScrolled ? 'opacity-100' : 'opacity-0'}`} />
             
             {/* CTA */}
             {isAuthenticated ? (
@@ -104,8 +98,8 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
                 href="/dashboard"
                 className={`text-sm font-medium transition-all ${
                     isScrolled && !isMobileMenuOpen
-                    ? "rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] px-5 py-1.5 hover:opacity-90 shadow-sm"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    ? "rounded-full bg-white text-black px-6 py-2 hover:bg-zinc-200 shadow-sm"
+                    : "text-zinc-400 hover:text-white"
                 }`}
                 >
                 Dashboard
@@ -115,8 +109,8 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
                 href="/login"
                 className={`text-sm font-medium transition-all ${
                     isScrolled && !isMobileMenuOpen
-                    ? "rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] px-5 py-1.5 hover:opacity-90 shadow-sm"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    ? "rounded-full bg-white text-black px-6 py-2 hover:bg-zinc-200 shadow-sm"
+                    : "text-zinc-400 hover:text-white"
                 }`}
                 >
                 Sign In
@@ -177,13 +171,7 @@ export function StickyNav({ isAuthenticated }: StickyNavProps) {
                     >
                     Docs
                 </Link>
-                <Link
-                    href="/changelog"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors block p-2 hover:bg-[var(--bg-secondary)] rounded-md"
-                    >
-                    Changelog
-                </Link>
+                 {/* Changelog removed as requested */}
              </div>
         </div>
       </div>
