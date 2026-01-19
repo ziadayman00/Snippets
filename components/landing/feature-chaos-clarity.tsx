@@ -39,19 +39,22 @@ export function ChaosToClarity() {
                     ].map((card, i) => (
                         <motion.div
                             key={i}
-                            initial={{ // Random float animation
+                            initial={{ 
+                                opacity: 0,
                                 y: card.y,
                                 x: card.x,
                                 rotate: card.rotate,
                             }}
-                            animate={{
-                                y: [card.y, card.y - 10, card.y],
-                                rotate: [card.rotate, card.rotate + 2, card.rotate - 2, card.rotate],
+                            whileInView={{
+                                opacity: 1,
+                                y: card.y,
+                                x: card.x,
+                                rotate: card.rotate,
                             }}
+                            viewport={{ once: true }}
                             transition={{
-                                duration: 4 + i,
-                                repeat: Infinity,
-                                ease: "easeInOut",
+                                duration: 0.6,
+                                delay: i * 0.1,
                             }}
                             className={cn(
                                 "absolute w-40 h-28 rounded-xl border border-white/10 shadow-2xl flex flex-col items-center justify-center gap-2 p-4",

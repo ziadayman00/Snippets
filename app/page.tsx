@@ -9,6 +9,11 @@ import { FinalCTA } from "@/components/landing/final-cta";
 import { Footer } from "@/components/landing/footer";
 import { SharingShowcase } from "@/components/landing/sharing-showcase";
 import { ChaosToClarity } from "@/components/landing/feature-chaos-clarity";
+import { ProblemSolution } from "@/components/landing/problem-solution";
+
+
+
+
 
 export default async function Home() {
   const supabase = await createClient();
@@ -25,6 +30,7 @@ export default async function Home() {
         <SocialProof />
         <ProductDemo />
         <SharingShowcase />
+        <ProblemSolution />
         <ChaosToClarity />
         <BentoGrid />
         <PricingPreview />

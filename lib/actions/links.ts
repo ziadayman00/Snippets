@@ -4,6 +4,72 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle/db";
 import { entries, snippetLinks } from "@/lib/drizzle/schema";
 import { and, eq, ilike, ne, desc } from "drizzle-orm";
+import { extractMentionContext } from "@/lib/utils/backlink-context-extractor";
+
+export interface BacklinkWithContext {
+  id: string; // link id
+  sourceId: string;
+  sourceTitle: string;
+  sourceSlug: string | null;
+  technologyId: string;
+  context: string | null;
+  createdAt: Date;
+}
+
+export async function getBacklinkContext(entryId: string): Promise<BacklinkWithContext[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  // Fetch incoming links with source entry content
+  const links = await db
+    .select({
+      id: snippetLinks.id,
+      sourceId: snippetLinks.sourceId,
+      sourceTitle: entries.title,
+      sourceContent: entries.content,
+      sourceSlug: entries.slug,
+      technologyId: entries.technologyId,
+      createdAt: snippetLinks.createdAt,
+    })
+    .from(snippetLinks)
+    .leftJoin(entries, eq(snippetLinks.sourceId, entries.id))
+    .where(eq(snippetLinks.targetId, entryId))
+    .orderBy(desc(snippetLinks.createdAt));
+
+  // Extract context for each link
+  return links.map(link => {
+    // If we have content, extract the context
+    // If entries join failed (shouldn't happen), use defaults
+    if (!link.sourceTitle) {
+      return {
+        id: link.id,
+        sourceId: link.sourceId,
+        sourceTitle: "Unknown Snippet",
+        sourceSlug: null,
+        technologyId: "",
+        context: null,
+        createdAt: link.createdAt || new Date(),
+      };
+    }
+
+    return {
+      id: link.id,
+      sourceId: link.sourceId,
+      sourceTitle: link.sourceTitle,
+      sourceSlug: link.sourceSlug,
+      technologyId: link.technologyId || "",
+      context: extractMentionContext(link.sourceContent, entryId),
+      createdAt: link.createdAt || new Date(),
+    };
+  });
+}
+
 
 export async function searchSnippets(query: string, excludeId?: string) {
   const supabase = await createClient();

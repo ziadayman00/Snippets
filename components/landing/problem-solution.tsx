@@ -4,17 +4,17 @@ import { motion } from "motion/react";
 import { X, CheckCircle2, ArrowRight } from "lucide-react";
 
 const problems = [
-  "Snippets lost in Slack threads",
-  "Can't find that regex from last month",
-  "Rewriting the same code repeatedly",
-  "Scattered across Gist, Notion, notes",
+  "Critical decisions buried in Slack threads",
+  "Context lost between tickets and code",
+  "Re-solving the same bugs quarterly",
+  "Knowledge scattered across 5+ tools",
 ];
 
 const solutions = [
-  "One place for all code snippets",
-  "Smart search finds anything instantly",
-  "AI explains your code back to you",
-  "Organized by tech, searchable by meaning",
+  "Unified Technical Memory",
+  "Knowledge Graph linking code & context",
+  "AI that answers with your engineering wisdom",
+  "One source of truth for your team",
 ];
 
 export function ProblemSolution() {

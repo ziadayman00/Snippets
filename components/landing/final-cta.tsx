@@ -15,7 +15,7 @@ export function FinalCTA() {
           transition={{ duration: 0.8 }}
           className="max-w-4xl mx-auto text-center"
         >
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-6 font-mono">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 font-mono">
             <span className="text-white">Build your knowledge base</span>
           </h2>
           

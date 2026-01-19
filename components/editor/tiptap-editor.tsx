@@ -38,6 +38,7 @@ interface EditorProps {
   currentEntryId?: string;
   variant?: "default" | "clean";
   stickyOffset?: number;
+  technologyName?: string; // For smart language suggestions
 }
 
 // Custom Heading to enforce specific Tailwind classes for visual hierarchy
@@ -63,6 +64,7 @@ import tippy from 'tippy.js';
 import { MentionList } from './mention-list';
 import { searchSnippets } from '@/lib/actions/links';
 import { SlashCommand, getSuggestionItems, renderSuggestion } from './extensions/slash-command';
+import { GhostPrompt } from './extensions/ghost-prompt';
 
 // Highlight colors palette
 const HIGHLIGHT_COLORS = [
@@ -85,6 +87,7 @@ export function TiptapEditor({
   currentEntryId,
   variant = "default",
   stickyOffset = 0,
+  technologyName,
 }: EditorProps) {
   const [jsonContent, setJsonContent] = useState(content);
   const [menuStyle, setMenuStyle] = useState<{ top: number; left: number } | null>(null);
@@ -122,6 +125,22 @@ export function TiptapEditor({
       CodeBlockLowlight.extend({
         addNodeView() {
           return ReactNodeViewRenderer(CodeMirrorBlock);
+        },
+        addAttributes() {
+          return {
+            language: {
+              default: null,
+            },
+            intent: {
+              default: null, // 'ideation' | 'production' | 'deprecated' | 'example'
+            },
+            version: {
+              default: null,
+            },
+            verified: {
+              default: null, // timestamp
+            },
+          }
         }
       }).configure({ lowlight }),
       Highlight.configure({
@@ -222,6 +241,10 @@ export function TiptapEditor({
       TableRow,
       TableHeader,
       TableCell,
+      GhostPrompt.configure({
+        technologyName,
+        showOnlyWhenEmpty: true,
+      }),
     ],
     content: content ? JSON.parse(content) : "", 
     editable,
@@ -253,6 +276,14 @@ export function TiptapEditor({
     },
     immediatelyRender: false, 
   });
+
+  // Store technology name in editor storage for CodeMirror blocks
+  useEffect(() => {
+    if (editor && technologyName) {
+      (editor.storage as any).technologyName = technologyName;
+    }
+  }, [editor, technologyName]);
+
 
   // Handle search highlighting from URL parameter
   useEffect(() => {

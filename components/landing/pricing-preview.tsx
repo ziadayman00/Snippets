@@ -16,7 +16,7 @@ export function PricingPreview() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-4 font-mono">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 font-mono">
             <span className="text-white">Simple pricing</span>
           </h2>
           <p className="text-xl text-zinc-400">

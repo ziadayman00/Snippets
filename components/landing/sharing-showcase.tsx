@@ -1,28 +1,37 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { Share2, Eye, Copy, Globe, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useRef } from "react";
 
 export function SharingShowcase() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Parallax for different elements
+  const leftX = useTransform(scrollYProgress, [0, 0.5], [-100, 0]);
+  const rightX = useTransform(scrollYProgress, [0, 0.5], [100, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+
   return (
-    <section className="py-24 container mx-auto px-6 relative overflow-hidden">
+    <section ref={sectionRef} className="py-32 container mx-auto px-6 relative overflow-hidden">
         {/* Background Glow */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto relative z-10">
         
-        {/* Left: Visual Demo */}
+        {/* Left: Visual Demo - Slide in from left */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          style={{ x: leftX, opacity }}
           className="relative group"
         >
             {/* Window Glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
           
           {/* Mock Editor Window */}
           <div className="relative rounded-2xl border border-white/10 bg-[#0A0A0A]/90 backdrop-blur-xl shadow-2xl overflow-hidden">
@@ -105,12 +114,9 @@ export function SharingShowcase() {
           </div>
         </motion.div>
 
-        {/* Right: Content */}
+        {/* Right: Content - Slide in from right */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          style={{ x: rightX, opacity }}
           className="space-y-8"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-xs font-medium font-mono">
@@ -128,7 +134,13 @@ export function SharingShowcase() {
           </p>
 
           <div className="space-y-6">
-            <div className="flex items-start gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+            >
                 <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 mt-1">
                     <Sparkles className="w-5 h-5" />
                 </div>
@@ -136,8 +148,14 @@ export function SharingShowcase() {
                     <h4 className="text-white font-medium mb-1">Instant Previews</h4>
                     <p className="text-sm text-zinc-400">Auto-generated social cards ensure your snippets look stunning on Twitter, Slack, and Discord.</p>
                 </div>
-            </div>
-             <div className="flex items-start gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+            </motion.div>
+             <motion.div 
+               initial={{ opacity: 0, x: 20 }}
+               whileInView={{ opacity: 1, x: 0 }}
+               viewport={{ once: true }}
+               transition={{ delay: 0.3 }}
+               className="flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+             >
                 <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 mt-1">
                     <Eye className="w-5 h-5" />
                 </div>
@@ -145,7 +163,7 @@ export function SharingShowcase() {
                     <h4 className="text-white font-medium mb-1">Engagement Analytics</h4>
                     <p className="text-sm text-zinc-400">Track how many developers are learning from your code with built-in view counting.</p>
                 </div>
-            </div>
+            </motion.div>
           </div>
 
            <Link

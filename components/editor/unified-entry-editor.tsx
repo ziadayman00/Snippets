@@ -6,13 +6,15 @@ import Link from "next/link";
 import { EditorGuide } from "./editor-guide";
 import { EditorTour } from "@/components/onboarding/editor-tour";
 import { ShareButton } from "./share-button";
-import { Calendar, Link as LinkIcon, ArrowRightLeft, ChevronLeft, Save, Loader2, AlertCircle, Clock, Trash2, PanelRight, Check, Eye } from "lucide-react";
+import { Calendar, Link as LinkIcon, ArrowRightLeft, ChevronLeft, Save, Loader2, AlertCircle, Clock, Trash2, PanelRight, Check, Eye, RefreshCw, BookOpen } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { TagInput } from "@/components/tags/tag-input";
 import { autoSaveEntry, createEntry, deleteEntry } from "@/lib/actions/entry";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/use-debounce"; 
 import { toast } from "sonner"; 
+import { InlineBacklinks } from "./inline-backlinks"; 
+import { analyzeEntryQuality } from "@/lib/utils/entry-quality";
 
 interface LinkedSnippet {
     id: string;
@@ -393,8 +395,14 @@ export function UnifiedEntryEditor({
                             currentEntryId={entryId}
                             variant="clean"
                             stickyOffset={80}
+                            technologyName={technologyName}
                         />
                     </div>
+
+                    {/* Inline Backlinks */}
+                    {!isNew && entryId && (
+                        <InlineBacklinks entryId={entryId} />
+                    )}
 
                     {/* Footer Area */}
                     <div className="mt-20 pt-10 border-t border-[var(--border-primary)]/30 flex items-center justify-between text-[var(--text-muted)] text-sm">
@@ -431,29 +439,104 @@ export function UnifiedEntryEditor({
             <div className={`fixed inset-y-0 right-0 z-50 lg:relative lg:z-0 border-l border-[var(--border-primary)] bg-[var(--bg-secondary)]/95 backdrop-blur-md lg:bg-[var(--bg-secondary)]/30 transition-all duration-300 flex flex-col shrink-0 shadow-2xl lg:shadow-none ${isSidebarOpen ? 'w-80 translate-x-0' : 'w-0 translate-x-full opacity-0 overflow-hidden lg:opacity-100 lg:translate-x-full'}`}>
                 <div className="p-6 space-y-8 overflow-y-auto flex-1">
                     
-                    {/* Metadata Section */}
+                     {/* Metadata Section */}
                     <div>
                          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">
                             Details
                          </h3>
                          <div className="space-y-3">
+                             {/* Last Updated / Freshness */}
                              <div className="flex items-center justify-between text-sm">
-                                 <span className="text-[var(--text-secondary)]">Created</span>
-                                 <span className="text-[var(--text-primary)]">{isNew ? "Just now" : "Recently"}</span>
+                                 <span className="text-[var(--text-secondary)]">Freshness</span>
+                                 {!isNew ? (
+                                    <div className="flex items-center gap-2">
+                                        {(() => {
+                                            const daysOld = Math.floor((new Date().getTime() - new Date(lastUpdated).getTime()) / (1000 * 60 * 60 * 24));
+                                            
+                                            if (daysOld > 90) {
+                                                return (
+                                                    <>
+                                                        <span className="flex h-2 w-2 rounded-full bg-red-500/50 ring-2 ring-red-500/20" title="Stale (> 3 months)" />
+                                                        <span className="text-[var(--text-muted)] text-xs">Stale</span>
+                                                        <button 
+                                                            onClick={handleSave} // Triggers update
+                                                            className="p-1 hover:bg-[var(--bg-tertiary)] rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                                                            title="Mark as reviewed"
+                                                        >
+                                                            <RefreshCw className="h-3 w-3" />
+                                                        </button>
+                                                    </>
+                                                );
+                                            } else if (daysOld > 30) {
+                                                return (
+                                                    <>
+                                                        <span className="flex h-2 w-2 rounded-full bg-yellow-500/50 ring-2 ring-yellow-500/20" title="Aging (> 1 month)" />
+                                                        <span className="text-[var(--text-secondary)] text-xs">Aging</span>
+                                                    </>
+                                                );
+                                            } else {
+                                                return (
+                                                    <>
+                                                        <span className="flex h-2 w-2 rounded-full bg-green-500/50 ring-2 ring-green-500/20" title="Fresh (< 1 month)" />
+                                                        <span className="text-[var(--text-primary)] text-xs">Fresh</span>
+                                                    </>
+                                                );
+                                            }
+                                        })()}
+                                    </div>
+                                 ) : (
+                                    <span className="text-[var(--text-primary)]">New</span>
+                                 )}
                              </div>
+
                              <div className="flex items-center justify-between text-sm">
-                                 <span className="text-[var(--text-secondary)]">Status</span>
-                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-500">
-                                     Active
+                                 <span className="text-[var(--text-secondary)]">Updated</span>
+                                 <span className="text-[var(--text-primary)]">
+                                     {isNew ? "Just now" : formatDistanceToNow(new Date(lastUpdated), { addSuffix: true })}
                                  </span>
                              </div>
+                             
+                             {/* Quality Signal */}
+                             <div className="flex items-center justify-between text-sm">
+                                 <span className="text-[var(--text-secondary)]">Status</span>
+                                 {analyzeEntryQuality({ title, tags, content }).isWellStructured ? (
+                                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-500 animate-in fade-in">
+                                         <Check className="h-3 w-3" />
+                                         Well-structured
+                                     </span>
+                                 ) : (
+                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+                                         Draft
+                                     </span>
+                                 )}
+                             </div>
+
+                             {/* Metrics */}
                              <div className="flex items-center justify-between text-sm">
                                  <span className="text-[var(--text-secondary)]">Words</span>
                                  <span className="text-[var(--text-primary)]">
-                                     {typeof content === 'string' ? 0 : JSON.stringify(content).split(' ').length}
+                                     {analyzeEntryQuality({ title, tags, content }).metrics.wordCount}
+                                 </span>
+                             </div>
+                             <div className="flex items-center justify-between text-sm">
+                                 <span className="text-[var(--text-secondary)]">Code Blocks</span>
+                                 <span className="text-[var(--text-primary)]">
+                                     {analyzeEntryQuality({ title, tags, content }).metrics.codeBlockCount}
                                  </span>
                              </div>
                          </div>
+                    </div>
+
+                    {/* Resources */}
+                    <div className="mt-8">
+                         <Link 
+                            href="/docs/editor-guide" 
+                            target="_blank"
+                            className="flex items-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors opacity-60 hover:opacity-100"
+                         >
+                             <BookOpen className="h-3.5 w-3.5" />
+                             <span>Editor Guide</span>
+                         </Link>
                     </div>
 
                     {/* Outlinks */}

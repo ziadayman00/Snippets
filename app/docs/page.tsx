@@ -11,7 +11,7 @@ export default async function DocsPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]">
+    <div className="flex min-h-screen flex-col bg-[#0A0A0A] text-white">
       <StickyNav isAuthenticated={!!user} />
 
       <main className="flex-1 pt-32 pb-20">

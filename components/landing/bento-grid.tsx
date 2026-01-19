@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { Sparkles, Network, Code2, Search } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { CodeEditorMockup, AIChatMockup, KnowledgeGraphMockup, SearchMockup } from "./visual-mockups";
 
 const features = [
@@ -37,11 +37,27 @@ const features = [
 ];
 
 function FeatureCard({ feature, index }: { feature: typeof features[0]; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start end", "center center"]
+  });
+
+  // 3D rotation effect
+  const rotateX = useTransform(scrollYProgress, [0, 0.5], [20, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [0.85, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      ref={cardRef}
+      style={{
+        rotateX,
+        scale,
+        opacity,
+        transformPerspective: 1200,
+        transformStyle: "preserve-3d"
+      }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className={`group relative ${feature.span}`}
     >
@@ -50,9 +66,13 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
       
       <div className="relative h-full rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-8 hover:border-white/20 transition-all duration-300">
         {/* Icon */}
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-primary)]/10 mb-6">
+        <motion.div 
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-primary)]/10 mb-6"
+        >
           <feature.icon className="h-6 w-6 text-[var(--accent-primary)]" />
-        </div>
+        </motion.div>
 
         {/* Content */}
         <h3 className="text-2xl font-bold text-white mb-3 font-mono">{feature.title}</h3>
@@ -68,21 +88,27 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 }
 
 export function BentoGrid() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  const headerY = useTransform(scrollYProgress, [0, 0.5], [50, 0]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+
   return (
-    <section className="relative py-32 overflow-hidden">
+    <section ref={sectionRef} className="relative py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.01] to-transparent" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          style={{ y: headerY, opacity: headerOpacity }}
           className="text-center mb-20"
         >
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-6 font-mono">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 font-mono">
             <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-400">
               Built for developers
             </span>

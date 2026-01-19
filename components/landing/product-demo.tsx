@@ -5,7 +5,7 @@ import { CodeEditorMockup } from "./visual-mockups";
 
 export function ProductDemo() {
   return (
-    <section className="relative py-20 pb-32">
+    <section className="relative py-24">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -28,7 +28,7 @@ export function ProductDemo() {
             </div>
 
           {/* Glow Effect */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[var(--accent-primary)]/10 rounded-full blur-[100px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px]" />
           
           {/* We reuse the Bento visuals or create a variation if needed. 
               But for now, sticking to the bento visuals or we can add a new one.

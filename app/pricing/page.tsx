@@ -33,7 +33,7 @@ export default async function PricingPage() {
         {/* Clean Background - specific request to remove Neural visuals from this page */}
         <div className="absolute inset-0 z-0 pointer-events-none">
              {/* Simple subtle glow instead of full neural network */}
-             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-purple-500/10 blur-[120px]" />
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-purple-500/10 blur-[120px]" />
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
@@ -43,7 +43,7 @@ export default async function PricingPage() {
                     <Sparkles className="h-3 ml-1 w-3 text-pink-400" />
                     <span className="mr-1">Simple. Transparent.</span>
                 </div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 font-mono">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 font-mono">
                     <span className="text-white">Pricing that scales</span>
                 </h1>
                 <p className="text-xl text-zinc-400 leading-relaxed">
