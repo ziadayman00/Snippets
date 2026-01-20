@@ -239,3 +239,47 @@ export const collectionEntriesRelations = relations(collectionEntries, ({ one })
     references: [technologies.id],
   }),
 }));
+
+// Plans - Developer Planning Feature
+// Plan Categories
+export const planCategories = pgTable("plan_categories", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
+  name: text("name").notNull(),
+  color: text("color").notNull(), // 'slate' | 'blue' | 'emerald' | 'amber' | 'rose' | 'violet'
+  userId: uuid("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("plan_categories_user_id_idx").on(table.userId),
+}));
+
+// Plans - Developer Planning Feature
+export const plans = pgTable("plans", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
+  title: text("title").notNull(),
+  content: jsonb("content"), // Rich text content (TipTap JSON)
+  userId: uuid("user_id").notNull(), // Managed by Supabase Auth
+  categoryId: uuid("category_id").references(() => planCategories.id, { onDelete: 'set null' }),
+  isPublic: boolean("is_public").default(false).notNull(),
+  isPinned: boolean("is_pinned").default(false).notNull(),
+  position: integer("position").default(0), // For ordering plans if needed
+  color: text("color").default("default"), // For sticky note color theme (Legacy/Fallback)
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("plans_user_id_idx").on(table.userId),
+  categoryIdIdx: index("plans_category_id_idx").on(table.categoryId),
+  createdAtIdx: index("plans_created_at_idx").on(table.createdAt),
+}));
+
+// Relations for Plans
+export const plansRelations = relations(plans, ({ one }) => ({
+   category: one(planCategories, {
+     fields: [plans.categoryId],
+     references: [planCategories.id],
+   }),
+}));
+
+export const planCategoriesRelations = relations(planCategories, ({ many }) => ({
+  plans: many(plans),
+}));
+

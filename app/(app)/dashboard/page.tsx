@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/drizzle/db";
-import { entries, technologies, users } from "@/lib/drizzle/schema";
+import { entries, technologies, users, plans } from "@/lib/drizzle/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
 
 // Components
@@ -16,10 +16,11 @@ import { LibrarySection } from "@/components/dashboard/library-section";
 import { StatsOverview } from "@/components/dashboard/stats-overview";
 import { ActivityHeatmap } from "@/components/dashboard/activity-heatmap";
 import { SemanticSearchBar } from "@/components/search/semantic-search-bar";
-import { Sparkles, Library as LibraryIcon } from "lucide-react";
+import { Sparkles, Library as LibraryIcon, StickyNote } from "lucide-react";
 import { UpgradeSuccessToast } from "@/components/upgrade/upgrade-success-toast";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { AISuggestions } from "@/components/dashboard/ai-suggestions";
+import { DashboardClient } from "@/components/dashboard/dashboard-client";
 
 // Actions
 import { getReviewCount } from "@/lib/actions/review";
@@ -53,9 +54,10 @@ export default async function Dashboard() {
   let recentEntriesRaw: any[] = [];
   let userTechnologies: any[] = [];
   let usageStats: any = null;
+  let userPlans: any[] = [];
 
   try {
-    [reviewCount, stats, recentEntriesRaw, userTechnologies, usageStats] = await Promise.all([
+    [reviewCount, stats, recentEntriesRaw, userTechnologies, usageStats, userPlans] = await Promise.all([
       getReviewCount().catch(err => {
         console.error("getReviewCount failed:", err);
         return 0;
@@ -88,6 +90,16 @@ export default async function Dashboard() {
       getUsageStats().catch(err => {
         console.error("getUsageStats failed:", err);
         return null;
+      }),
+      db.query.plans.findMany({
+        where: eq(plans.userId, user.id),
+        orderBy: [desc(plans.isPinned), desc(plans.updatedAt)],
+        with: {
+          category: true,
+        }
+      }).catch(err => {
+        console.error("Plans query failed:", err);
+        return [];
       })
     ]);
   } catch (error) {
@@ -109,43 +121,35 @@ export default async function Dashboard() {
   const greeting = hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening";
   const firstName = user.user_metadata.full_name?.split(" ")[0] || "Developer";
 
-  return (
-    <div className="min-h-screen bg-[var(--bg-primary)] p-6 md:p-10 space-y-8 max-w-6xl mx-auto">
-      
-      {/* 1. Page Header & Actions */}
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-            Dashboard
-          </h1>
-        </div>
+  // Snippets View Content
+  const snippetsView = (
+    <>
+      {/* Actions */}
+      <div className="flex items-center justify-end gap-3">
+           <div id="dashboard-ask">
+              <Link
+                  href="/ask"
+                  className="flex items-center justify-center gap-2 rounded-md bg-[var(--bg-secondary)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] border border-[var(--border-primary)] shadow-sm transition-all hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+              >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Ask AI</span>
+              </Link>
+           </div>
 
-        <div className="flex items-center gap-3">
-             <div id="dashboard-ask">
-                <Link
-                    href="/ask"
-                    className="flex items-center justify-center gap-2 rounded-md bg-[var(--bg-secondary)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] border border-[var(--border-primary)] shadow-sm transition-all hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
-                >
-                    <Sparkles className="h-4 w-4" />
-                    <span>Ask AI</span>
-                </Link>
-             </div>
+           <div id="dashboard-collections">
+              <Link
+                  href="/collections"
+                  className="flex items-center justify-center gap-2 rounded-md bg-[var(--bg-secondary)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] border border-[var(--border-primary)] shadow-sm transition-all hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+              >
+                  <LibraryIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Collections</span>
+              </Link>
+           </div>
 
-             <div id="dashboard-collections">
-                <Link
-                    href="/collections"
-                    className="flex items-center justify-center gap-2 rounded-md bg-[var(--bg-secondary)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] border border-[var(--border-primary)] shadow-sm transition-all hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
-                >
-                    <LibraryIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">Collections</span>
-                </Link>
-             </div>
-
-             <div id="dashboard-quick-create">
-                <QuickCreateDialog technologies={userTechnologies} />
-             </div>
-        </div>
-      </header>
+           <div id="dashboard-quick-create">
+              <QuickCreateDialog technologies={userTechnologies} />
+           </div>
+      </div>
 
       {/* 2. Key Metrics Bar */}
       <StatsOverview stats={stats} />
@@ -194,6 +198,13 @@ export default async function Dashboard() {
        <Suspense fallback={null}>
          <UpgradeSuccessToast />
        </Suspense>
-    </div>
+    </>
+  );
+
+  return (
+    <DashboardClient 
+      snippetsView={snippetsView}
+      plansData={userPlans}
+    />
   );
 }

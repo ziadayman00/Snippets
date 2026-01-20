@@ -4,7 +4,7 @@ import { useState } from "react";
 import { 
   BookOpen, Code2, Search, Sparkles, Zap, 
   CheckCircle2, ChevronDown, ChevronRight,
-  Rocket, Shield, Clock, Crown, HelpCircle
+  Rocket, Shield, Clock, Crown, HelpCircle, StickyNote
 } from "lucide-react";
 import Link from "next/link";
 
@@ -171,6 +171,11 @@ export function DocsContent() {
               icon={Clock}
               title="Spaced Repetition"
               description="Review snippets at optimal intervals to reinforce learning. The system tracks your progress and suggests snippets for review."
+            />
+            <FeatureCard
+              icon={StickyNote}
+              title="Planning Playground"
+              description="Rich text workspace for organizing ideas, roadmaps, and tasks. Create plans with checklists, code blocks, and categorize with muted color themes."
             />
           </div>
         </section>

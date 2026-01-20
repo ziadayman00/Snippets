@@ -10,6 +10,7 @@ import { Footer } from "@/components/landing/footer";
 import { SharingShowcase } from "@/components/landing/sharing-showcase";
 import { ChaosToClarity } from "@/components/landing/feature-chaos-clarity";
 import { ProblemSolution } from "@/components/landing/problem-solution";
+import { PlansShowcase } from "@/components/landing/plans-showcase";
 
 
 
@@ -33,6 +34,7 @@ export default async function Home() {
         <ProblemSolution />
         <ChaosToClarity />
         <BentoGrid />
+        <PlansShowcase />
         <PricingPreview />
         <FinalCTA />
       </main>

@@ -61,7 +61,7 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
               </span>
               <span className="text-purple-500/50 mx-2">|</span>
               <span className="inline-flex items-center gap-1.5 text-purple-300">
-                v1.3.0
+                v1.4.0
               </span>
             </motion.div>
           </Link>

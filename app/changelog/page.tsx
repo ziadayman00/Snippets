@@ -23,9 +23,29 @@ export default async function ChangelogPage() {
 
             <div className="space-y-12 relative border-l border-white/10 pl-8 ml-4 md:ml-0">
                 {/* Latest Release */}
-                {/* Release 1.3.0 */}
+                {/* Release 1.4.0 */}
                 <div className="relative">
                     <span className="absolute -left-[39px] top-1.5 h-5 w-5 rounded-full border-4 border-[#0A0A0A] bg-purple-500" />
+                    <div className="flex items-center gap-3 mb-3">
+                        <span className="text-sm font-medium text-zinc-500 font-mono">January 20, 2026</span>
+                        <span className="bg-purple-500/10 text-purple-400 text-xs font-mono px-2 py-0.5 rounded border border-purple-500/20">
+                            v1.4.0
+                        </span>
+                    </div>
+                    <h2 className="text-2xl font-bold mb-4 font-mono">Planning Playground</h2>
+                    <ul className="list-disc list-outside ml-4 space-y-2 text-zinc-300">
+                        <li>Introduced Plans - a rich text planning workspace for ideas and roadmaps.</li>
+                        <li>Added category system with 6 muted color themes (Slate, Blue, Emerald, Amber, Rose, Violet).</li>
+                        <li>Rich text editor with checklists, code blocks, and full formatting support.</li>
+                        <li>Auto-save functionality with real-time content persistence.</li>
+                        <li>Pin important plans to keep them at the top.</li>
+                        <li>Distraction-free editor mode without navbar.</li>
+                    </ul>
+                </div>
+
+                {/* Release 1.3.0 */}
+                <div className="relative">
+                    <span className="absolute -left-[39px] top-1.5 h-5 w-5 rounded-full border-4 border-[#0A0A0A] bg-zinc-700" />
                     <div className="flex items-center gap-3 mb-3">
                         <span className="text-sm font-medium text-zinc-500 font-mono">January 11, 2026</span>
                         <span className="bg-purple-500/10 text-purple-400 text-xs font-mono px-2 py-0.5 rounded border border-purple-500/20">

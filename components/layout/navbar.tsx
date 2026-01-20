@@ -36,6 +36,9 @@ export function Navbar({ user, userRole, onSignOut, breadcrumbs }: NavbarProps) 
                 className="h-6 w-6"
               />
             </Link>
+            <Link href="/plans" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ml-2 hidden md:block">
+                Plans
+            </Link>
             <span className="text-[var(--text-muted)] shrink-0">/</span>
             {/* Hide email on mobile, show on sm+ */}
             <span className="hidden sm:inline text-xs text-[var(--text-muted)] truncate">{user.email}</span>

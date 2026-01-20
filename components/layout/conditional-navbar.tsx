@@ -17,7 +17,7 @@ export function ConditionalNavbar({ user, onSignOut }: ConditionalNavbarProps) {
   const [userRole, setUserRole] = useState<string | null>(null);
   
   // Hide navbar on editor pages
-  const isEditorPage = pathname.includes("/edit/") || pathname.endsWith("/new");
+  const isEditorPage = pathname.includes("/edit/") || pathname.endsWith("/new") || (pathname.startsWith("/plans/") && pathname.split("/").length > 2);
   
   // Fetch user role
   useEffect(() => {
